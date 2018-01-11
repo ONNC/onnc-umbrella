@@ -93,4 +93,4 @@ Directory Structure
 * README    - This document
 * README.md - Same document in Markdown format
 * build.sh  - The building script
-* trunk     - The placeholder of onnc project
+* onnc      - The placeholder of onnc project
