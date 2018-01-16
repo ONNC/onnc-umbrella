@@ -16,10 +16,9 @@ AC_DEFUN([CHECK_ONNC],
 abs_builddir=$(cd "${builddir}" && pwd)
 abs_srcdir=$(cd "${srcdir}" && pwd)
 
-LIBONNC_INCLUDES="-I${abs_srcdir}/include\
- -I${abs_builddir}/include\
- -I${abs_builddir}/lib\
- ${LIBEVENT_INCLUDES}"
+LIBONNC_INCLUDES="-I${abs_srcdir}/include \
+ -I${abs_builddir}/include \
+ -I${abs_builddir}/lib"
 LIBONNC_LDFLAGS="-L${abs_builddir}/lib"
 LIBONNC_LIBS="-lonnc"
 
