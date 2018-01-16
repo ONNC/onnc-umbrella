@@ -1,0 +1,103 @@
+# ONNC Umbrella
+
+## Introduction
+
+ONNC Umbrella is the umbrella for all ONNC projects.
+
+## Prerequisites
+  1. git
+  2. Autotools
+  3. GNU Libtool
+
+### Ubuntu - with Apt ###
+```
+apt install git automake libtool
+```
+
+### macOS - with Homebrew ###
+
+```
+xcode-select --install
+brew install git autoconf automake libtool
+```
+
+## Compilation Instructions
+The simplest way to compile this package is:
+
+Dance with `build.sh` script.
+
+1. Check out ONNC from the repository.
+
+```
+git clone ssh://git@git-bitmain.skymizer.com:6824/bmsky/onnc.git ${ONNC}
+```
+
+2. Type `cd ${ONNC}' to the directory containing the source code.
+
+3. Use `build.sh` to compile the package.
+```
+./build.sh <source folder> [mode] [target folder]
+```
+
+The package is built at `./build-<source folder>-<mode>/`, and installed
+to `./install-<source folder>-<mode>/`. It is a staged installation if the
+third argument (target folder) is given. Check GNU automake's DESTDIR for
+more information about a staged installation at the below
+[link](https://www.gnu.org/software/automake/manual/html_node/DESTDIR.html).
+
+For example, use `./build.sh trunk dbg /opt/onnc` to build the latest
+revision in debug mode for installation at `/opt/onnc`.
+
+It will build in `build-trunk-dbg`, install to `install-trunk-dbg`, and
+generate a binary package named `onnc-trunk.tar.gz`. You can use
+
+```
+tar zxf onnc-trunk.tar.gz -C /opt
+```
+
+or
+```
+mkdir /opt/onnc
+tar zxf onnc-trunk.tar.gz --strip-components 1 -C /opt/onnc
+```
+
+to extract the binary package at the target folder.
+
+Recompile with the same arguments `./build.sh trunk dbg /opt/onnc`, or
+make with DESTDIR=./install-trunk-dbg to ensure the binaries are installed
+to the staged installation path instead of being installed directly to the
+target folder `/opt/onnc`.
+
+```
+        cd ./build-trunk-dbg
+        make DESTDIR=$(pwd)/../install-trunk-dbg install
+```
+
+### Source Folder
+
+Select the version of source code by changing the first argument. Use
+`./trunk` to build the latest revision of development tree, or one of
+the sub-directories in `./tags` for a stable version.
+
+### Building Mode
+
+There are four building modes, regression mode, debugging mode, optimizing
+mode and normal mode. Select mode by changing the second argument.
+
+| mode    | description                                                  |
+|---------|--------------------------------------------------------------|
+| normal  | (default) build with normal compilation flags                |
+| dbg     | build in debug mode (unittest enabled)                       |
+| rgn     | build in debug mode (unittest enabled) with regression test  |
+| opt     | build in optimized mode                                      |
+
+### Target Folder
+
+The package is configured to be installed at the target folder (PREFIX).
+
+## Directory Structure
+
+* README    - This document
+* README.md - Same document in Markdown format
+* build.sh  - The building script
+* trunk     - The placeholder of onnc project
