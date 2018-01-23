@@ -49,7 +49,7 @@ For example, use `./build.sh dbg /opt/onnc` to build the latest
 revision in debug mode for installation at `/opt/onnc`.
 
 It will build in `build-dbg`, install to `install-dbg`, and
-generate a binary package named `onnc-master.tar.gz`. You can use
+generate a binary package named `onnc-<branch name>.tar.gz`. You can use
 
 ```
 tar zxf onnc-master.tar.gz -C /opt
