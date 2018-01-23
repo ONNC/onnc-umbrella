@@ -10,7 +10,7 @@ function usage
 {
   show "Usage of $(basename $0)"
   echo
-  echo "  $0 <source folder> [mode] [install folder]"
+  echo "  $0 [mode] [install folder]"
   echo
   echo "mode"
   echo "  * normal: default"
@@ -49,29 +49,29 @@ function check_mode
 function setup_environment
 {
   # building mode
-  export ONNC_MODE=${2:-normal}
+  export ONNC_MODE=${1:-normal}
   check_mode "${ONNC_MODE}"
   if [ $? -ne 0 ]; then
     usage_exit "$@"
   fi
 
-  # root to the source folder
-  export ONNC_SRCDIR=$(getabs "$1")
-  local SRCDIR_NAME=$(basename "${ONNC_SRCDIR}")
+  # root to the source & external source folder
+  export ONNC_SRCDIR=$(getabs "src")
+  export ONNC_EXTSRCDIR=$(getabs "external")
   fail_panic "directory not found: ${ONNC_SRCDIR}" test -d "${ONNC_SRCDIR}"
 
   # root to the installation place for external libraries
   export ONNC_EXTDIR=$(getabs "onncroot")
 
   # root to the building folder
-  export ONNC_BUILDDIR=$(getabs "build-${SRCDIR_NAME}-${ONNC_MODE}")
+  export ONNC_BUILDDIR=$(getabs "build-${ONNC_MODE}")
   if [ -d "${ONNC_BUILDDIR}" ]; then
     show "remove build directory"
     rm -rf "${ONNC_BUILDDIR}"
   fi
 
   # root to the destination folder
-  export ONNC_DESTDIR=$(getabs "install-${SRCDIR_NAME}-${ONNC_MODE}")
+  export ONNC_DESTDIR=$(getabs "install-${ONNC_MODE}")
   if [ -d "${ONNC_DESTDIR}" ]; then
     show "remove destination directory"
     rm -rf "${ONNC_DESTDIR}"
@@ -81,9 +81,10 @@ function setup_environment
   # use DESTDIR as PREFIX when $3 is not empty
   export IS_PREFIX_GIVEN="${3:+true}"
   export ONNC_PREFIX=$(getabs "${3:-"${ONNC_DESTDIR}"}")
+  export ONNC_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 
   # root to the tarball of files inside ${DESTDIR}
-  export ONNC_TARBALL=$(getabs "onnc-${SRCDIR_NAME}.tar.gz")
+  export ONNC_TARBALL=$(getabs "onnc-${ONNC_BRANCH_NAME}.tar.gz")
   if [ -f "${ONNC_TARBALL}" ]; then
     show "remove existing tarball"
     rm -rf "${ONNC_TARBALL}"
@@ -103,7 +104,7 @@ function setup_environment
 ##===----------------------------------------------------------------------===##
 function build_external
 {
-  build_skypat     "${ONNC_SRCDIR}/external/SkyPat-3.0"            "${ONNC_EXTDIR}"
+  build_skypat     "${ONNC_EXTSRCDIR}/SkyPat-3.0"            "${ONNC_EXTDIR}"
 }
 
 function build_onnc
@@ -190,7 +191,7 @@ function post_build
   elif [ "$(tar tvf "${ONNC_TARBALL}" | head -n 1 | wc -l)" -eq 0 ]; then
     SUCCESS=failed
   fi
-  show "build ${ONNC_SRCDIR} for installation on ${ONNC_PREFIX}: ${SUCCESS}"
+  show "build ${ONNC_TARBALL} for installation on ${ONNC_PREFIX}: ${SUCCESS}"
 }
 
 ##===----------------------------------------------------------------------===##

@@ -36,48 +36,42 @@ git clone ssh://git@git-bitmain.skymizer.com:6824/bmsky/onnc.git ${ONNC}
 
 3. Use `build.sh` to compile the package.
 ```
-./build.sh <source folder> [mode] [target folder]
+./build.sh [mode] [target folder]
 ```
 
-The package is built at `./build-<source folder>-<mode>/`, and installed
-to `./install-<source folder>-<mode>/`. It is a staged installation if the
+The package is built at `./build-<mode>/`, and installed
+to `./install-<mode>/`. It is a staged installation if the
 third argument (target folder) is given. Check GNU automake's DESTDIR for
 more information about a staged installation at the below
 [link](https://www.gnu.org/software/automake/manual/html_node/DESTDIR.html).
 
-For example, use `./build.sh trunk dbg /opt/onnc` to build the latest
+For example, use `./build.sh dbg /opt/onnc` to build the latest
 revision in debug mode for installation at `/opt/onnc`.
 
-It will build in `build-trunk-dbg`, install to `install-trunk-dbg`, and
-generate a binary package named `onnc-trunk.tar.gz`. You can use
+It will build in `build-dbg`, install to `install-dbg`, and
+generate a binary package named `onnc-master.tar.gz`. You can use
 
 ```
-tar zxf onnc-trunk.tar.gz -C /opt
+tar zxf onnc-master.tar.gz -C /opt
 ```
 
 or
 ```
 mkdir /opt/onnc
-tar zxf onnc-trunk.tar.gz --strip-components 1 -C /opt/onnc
+tar zxf onnc-master.tar.gz --strip-components 1 -C /opt/onnc
 ```
 
 to extract the binary package at the target folder.
 
-Recompile with the same arguments `./build.sh trunk dbg /opt/onnc`, or
-make with DESTDIR=./install-trunk-dbg to ensure the binaries are installed
+Recompile with the same arguments `./build.sh dbg /opt/onnc`, or
+make with DESTDIR=./install-dbg to ensure the binaries are installed
 to the staged installation path instead of being installed directly to the
 target folder `/opt/onnc`.
 
 ```
-        cd ./build-trunk-dbg
-        make DESTDIR=$(pwd)/../install-trunk-dbg install
+        cd ./build-dbg
+        make DESTDIR=$(pwd)/../install-dbg install
 ```
-
-### Source Folder
-
-Select the version of source code by changing the first argument. Use
-`./trunk` to build the latest revision of development tree, or one of
-the sub-directories in `./tags` for a stable version.
 
 ### Building Mode
 
@@ -100,4 +94,5 @@ The package is configured to be installed at the target folder (PREFIX).
 * README    - This document
 * README.md - Same document in Markdown format
 * build.sh  - The building script
-* trunk     - The placeholder of onnc project
+* src       - The source directory of onnc project
+* external  - The external librarys
