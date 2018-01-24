@@ -105,9 +105,10 @@ function setup_environment
 function build_external
 {
   show "building external libraries..."
+
   fail_panic "directory not found: ${ONNC_EXTSRCDIR}" test -d "${ONNC_EXTSRCDIR}"
 
-  build_skypat     "${ONNC_EXTSRCDIR}/SkyPat-3.0"            "${ONNC_EXTDIR}"
+  build_skypat  "${ONNC_EXTSRCDIR}/SkyPat"   "${ONNC_EXTDIR}"
 }
 
 function build_onnc

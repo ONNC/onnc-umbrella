@@ -218,3 +218,47 @@ function build_skypat
 {
   build_autotools_project "$1" "$2"
 }
+
+function build_llvm
+{
+  local SRCDIR=$1
+  local NAME=$(basename "${SRCDIR}")
+  local BUILDDIR=$(getabs "build-${NAME}")
+  local INSTALLDIR=$2
+
+  shift; shift
+
+  show "building ${NAME} ..."
+
+  if [ ! -d "${BUILDDIR}" ]; then
+    show "create build directory at '${BUILDDIR}'"
+    mkdir -p "${BUILDDIR}"
+  fi
+
+  pushd "${BUILDDIR}" > /dev/null
+  show "creating makefiles ..."
+
+  fail_panic "Cmake project - ${NAME} failed." \
+    cmake \
+    "-DCMAKE_BUILD_TYPE=Release" \
+    "-DCMAKE_INSTALL_PREFIX=${INSTALLDIR}" \
+    "${SRCDIR}"
+
+  local MAX_MAKE_JOBS=${MAX_MAKE_JOBS-2}
+  local PARALLEL_BUILD_FLAG=${MAX_MAKE_JOBS:+"-j${MAX_MAKE_JOBS}"}
+  show "making ... #jobs=${MAX_MAKE_JOBS}"
+  fail_panic "Make ${NAME} failed." ${MAKE} ${PARALLEL_BUILD_FLAG} all install
+
+  show "finishing ..."
+  popd > /dev/null
+}
+
+function build_onnx
+{
+  local SRCDIR="$1"
+  local NAME=$(basename "${SRCDIR}")
+
+  show "pip installing ..."
+  fail_panic "pip install ${NAME} failed." pip install "${SRCDIR}"
+  show "finishing ..."
+}
