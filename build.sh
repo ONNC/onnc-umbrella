@@ -58,7 +58,6 @@ function setup_environment
   # root to the source & external source folder
   export ONNC_SRCDIR=$(getabs "src")
   export ONNC_EXTSRCDIR=$(getabs "external")
-  fail_panic "directory not found: ${ONNC_SRCDIR}" test -d "${ONNC_SRCDIR}"
 
   # root to the installation place for external libraries
   export ONNC_EXTDIR=$(getabs "onncroot")
@@ -104,12 +103,17 @@ function setup_environment
 ##===----------------------------------------------------------------------===##
 function build_external
 {
+  show "building external libraries..."
+  fail_panic "directory not found: ${ONNC_EXTSRCDIR}" test -d "${ONNC_EXTSRCDIR}"
+
   build_skypat     "${ONNC_EXTSRCDIR}/SkyPat-3.0"            "${ONNC_EXTDIR}"
 }
 
 function build_onnc
 {
   show "building onnc..."
+
+  fail_panic "directory not found: ${ONNC_SRCDIR}" test -d "${ONNC_SRCDIR}"
 
   show "create build directory at '${ONNC_BUILDDIR}'"
   mkdir -p "${ONNC_BUILDDIR}"
