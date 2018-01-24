@@ -1,0 +1,7 @@
+*
+!src
+!external
+!scripts
+!build.sh
+!.git/HEAD
+**/*.swp

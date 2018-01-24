@@ -1,0 +1,13 @@
+FROM onnc-base
+
+WORKDIR /home/user/onnc-prebuilt-external
+RUN sudo chown user:user /home/user/onnc-prebuilt-external
+
+COPY --chown=user:user build.sh ./
+COPY --chown=user:user scripts/ ./scripts/
+COPY --chown=user:user external/ ./external/
+
+RUN EXTERNAL_ONLY=true \
+    ./build.sh dbg ; \
+    echo $? > ci-build-result.txt ; \
+    rm -rf build-*

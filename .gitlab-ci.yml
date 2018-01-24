@@ -1,0 +1,13 @@
+image: "$CI_REGISTRY/$CI_BASE_IMAGE"
+
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - build
+
+build:
+  stage: build
+  script:
+    - ./docker/build.sh base
+    - ./docker/build.sh prebuilt-external prebuilt

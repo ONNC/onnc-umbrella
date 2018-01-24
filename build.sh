@@ -80,7 +80,8 @@ function setup_environment
   # use DESTDIR as PREFIX when $2 is not empty
   export IS_PREFIX_GIVEN="${2:+true}"
   export ONNC_PREFIX=$(getabs "${2:-"${ONNC_DESTDIR}"}")
-  export ONNC_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+  local GIT_HEAD=$(cat .git/HEAD)
+  export ONNC_BRANCH_NAME="${GIT_HEAD#ref: refs/heads/}"
 
   # root to the tarball of files inside ${DESTDIR}
   export ONNC_TARBALL=$(getabs "onnc-${ONNC_BRANCH_NAME}.tar.gz")
