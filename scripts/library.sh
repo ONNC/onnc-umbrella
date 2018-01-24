@@ -221,6 +221,8 @@ function build_skypat
 
 function build_llvm
 {
+  local LLVM_VERSION="5.0.1"
+
   local SRCDIR=$1
   local NAME=$(basename "${SRCDIR}")
   local BUILDDIR=$(getabs "build-${NAME}")
@@ -236,6 +238,16 @@ function build_llvm
   fi
 
   pushd "${BUILDDIR}" > /dev/null
+
+  if [ ! -d "${SRCDIR}" ]; then
+    show "${SRCDIR} not found, downloading llvm-${LLVM_VERSION} to ${SRCDIR} ..."
+    fail_panic "download llvm failed." \
+      curl -SLOJ "https://releases.llvm.org/${LLVM_VERSION}/llvm-${LLVM_VERSION}.src.tar.xz" \
+      && tar Jxf "llvm-${LLVM_VERSION}.src.tar.xz" \
+      && mv "llvm-${LLVM_VERSION}.src" ${SRCDIR} \
+      && rm "llvm-${LLVM_VERSION}.src.tar.xz"
+  fi
+
   show "creating makefiles ..."
 
   fail_panic "Cmake project - ${NAME} failed." \
