@@ -78,9 +78,9 @@ function setup_environment
   fi
 
   # root to the target installation place (PREFIX given when configuring)
-  # use DESTDIR as PREFIX when $3 is not empty
-  export IS_PREFIX_GIVEN="${3:+true}"
-  export ONNC_PREFIX=$(getabs "${3:-"${ONNC_DESTDIR}"}")
+  # use DESTDIR as PREFIX when $2 is not empty
+  export IS_PREFIX_GIVEN="${2:+true}"
+  export ONNC_PREFIX=$(getabs "${2:-"${ONNC_DESTDIR}"}")
   export ONNC_BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 
   # root to the tarball of files inside ${DESTDIR}
