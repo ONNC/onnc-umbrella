@@ -28,7 +28,7 @@ Dance with `build.sh` script.
 
  1. Check out ONNC from the repository.
 
-        git clone ssh://git@git-bitmain.skymizer.com:6824/bmsky/onnc.git ${ONNC}
+        git clone --recursive ssh://git@git-bitmain.skymizer.com:6824/bmsky/onnc.git ${ONNC}
 
  2. Type `cd ${ONNC}' to the directory containing the source code.
 
