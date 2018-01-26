@@ -8,6 +8,7 @@ ONNC Umbrella is the umbrella for all ONNC projects.
   1. git
   2. Autotools
   3. GNU Libtool
+  4. Protocol Buffer
 
 ### Ubuntu - with Apt ###
 ```
@@ -18,7 +19,7 @@ apt install git automake libtool
 
 ```
 xcode-select --install
-brew install git autoconf automake libtool
+brew install git autoconf automake libtool protobuf
 ```
 
 ## Compilation Instructions
