@@ -4,3 +4,9 @@
 [submodule "external/onnx"]
 	path = external/onnx
 	url = https://github.com/onnx/onnx.git
+[submodule "external/bmnet"]
+	path = external/bmnet
+	url = https://git-bitmain.skymizer.com/bmsky/bmnet.git
+[submodule "external/bmtap"]
+	path = external/bmtap
+	url = https://git-bitmain.skymizer.com/bmsky/bmtap.git
