@@ -274,3 +274,40 @@ function build_onnx
   fail_panic "pip install ${NAME} failed." pip install "${SRCDIR}"
   show "finishing ..."
 }
+
+function build_bmtap
+{
+  local SRCDIR=$1
+  local NAME=$(basename "${SRCDIR}")
+  local EXTDIR=$(dirname "${SRCDIR}")
+  local BUILDDIR=$(getabs "build-${NAME}")
+  local INSTALLDIR=$2
+
+  shift; shift
+
+  show "building ${NAME} src=${SRCDIR} build=${BUILDDIR} install=${INSTALLDIR} ..."
+  pushd ${EXTDIR}
+  source ${EXTDIR}/build/envsetup.sh
+  source ${EXTDIR}/build/envsetup_bmtap.sh
+  build_bmtap
+  popd
+}
+
+function build_bmnet
+{
+  local SRCDIR=$1
+  local NAME=$(basename "${SRCDIR}")
+  local EXTDIR=$(dirname "${SRCDIR}")
+  local BUILDDIR=$(getabs "build-${NAME}")
+  local INSTALLDIR=$2
+
+  shift; shift
+
+  show "building ${NAME} ..."
+  pushd ${EXTDIR}
+  source ${EXTDIR}/build/envsetup.sh
+  source ${EXTDIR}/build/envsetup_bmnet.sh
+  build_bmnet_all
+  popd
+}
+
