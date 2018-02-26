@@ -6,12 +6,11 @@
 	url = https://github.com/onnx/onnx.git
 [submodule "external/bmnet"]
 	path = external/bmnet
-	url = https://git-bitmain.skymizer.com/bmsky/bmnet.git
+	url = ../../bmsky/bmnet.git
 	branch = dev_bmtap
 [submodule "external/bmtap"]
 	path = external/bmtap
-	url = https://git-bitmain.skymizer.com/bmsky/bmtap.git
+	url = ../../bmsky/bmtap.git
 [submodule "external/build"]
 	path = external/build
-	url = https://git-bitmain.skymizer.com/bmsky/bmbuild.git
-
+	url = ../../bmsky/bmbuild.git
