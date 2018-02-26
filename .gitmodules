@@ -10,3 +10,6 @@
 [submodule "external/bmtap"]
 	path = external/bmtap
 	url = https://git-bitmain.skymizer.com/bmsky/bmtap.git
+[submodule "external/bmbuild"]
+	path = external/bmbuild
+	url = https://git-bitmain.skymizer.com/bmsky/bmbuild.git
