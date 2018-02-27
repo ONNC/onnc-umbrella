@@ -131,15 +131,18 @@ function build_onnc
   case "${ONNC_MODE}" in
     normal)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
+			  --with-bmkernel="${ONNC_EXTSRCDIR}/install" \
                           --with-skypat="${ONNC_EXTDIR}"
       ;;
     dbg)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
+			  --with-bmkernel="${ONNC_EXTSRCDIR}/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --enable-unittest
       ;;
     rgn)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
+			  --with-bmkernel="${ONNC_EXTSRCDIR}/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --enable-debug \
                           --enable-unittest \
@@ -147,6 +150,7 @@ function build_onnc
       ;;
     opt)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
+			  --with-bmkernel="${ONNC_EXTSRCDIR}/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --enable-optimize
       ;;
