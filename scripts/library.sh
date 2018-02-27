@@ -254,6 +254,7 @@ function build_llvm
     cmake \
     "-DCMAKE_BUILD_TYPE=Release" \
     "-DCMAKE_INSTALL_PREFIX=${INSTALLDIR}" \
+    "-DLLVM_TARGETS_TO_BUILD=host;ARM;AArch64" \
     "${SRCDIR}"
 
   local MAX_MAKE_JOBS=${MAX_MAKE_JOBS-2}
