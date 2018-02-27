@@ -304,7 +304,6 @@ function build_bmnet
   shift; shift
 
   show "building ${NAME} ..."
-  (cd $SRCDIR; git checkout dev_bmtap)
   pushd ${EXTDIR}
   source ${EXTDIR}/build/envsetup.sh
   source ${EXTDIR}/build/envsetup_bmnet.sh
