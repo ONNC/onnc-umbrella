@@ -11,6 +11,25 @@ RUN sed -i 's/archive.ubuntu.com/debian.linux.org.tw/' /etc/apt/sources.list \
     && apt-get install -y --no-install-recommends \
         curl \
         sudo \
+# for bmkernel
+        build-essential \
+        gcc-arm-none-eabi \
+        libnewlib-arm-none-eabi \
+        libboost-all-dev \
+        pkg-config \
+# for caffe2
+        libgoogle-glog-dev \
+        libgtest-dev \
+        libiomp-dev \
+        libleveldb-dev \
+        liblmdb-dev \
+        libopencv-dev \
+        libopenmpi-dev \
+        libsnappy-dev \
+        libprotobuf-dev \
+        openmpi-bin \
+        openmpi-doc \
+        libgflags-dev \
 # for skypat
         automake \
         libtool \
