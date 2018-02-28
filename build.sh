@@ -112,7 +112,7 @@ function build_external
   build_bmnet   "${ONNC_EXTSRCDIR}/bmnet"    "${ONNC_EXTDIR}"
 
   build_skypat  "${ONNC_EXTSRCDIR}/SkyPat"   "${ONNC_EXTDIR}"
-  #build_llvm    "${ONNC_EXTSRCDIR}/llvm"     "${ONNC_EXTDIR}"
+  build_llvm    "${ONNC_EXTSRCDIR}/llvm"     "${ONNC_EXTDIR}"
   build_onnx    "${ONNC_EXTSRCDIR}/onnx"     "${ONNC_EXTDIR}"
 }
 
