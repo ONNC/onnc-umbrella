@@ -113,7 +113,7 @@ function build_external
 
   build_skypat  "${ONNC_EXTSRCDIR}/SkyPat"   "${ONNC_EXTDIR}"
   build_llvm    "${ONNC_EXTSRCDIR}/llvm"     "${ONNC_EXTDIR}"
-  build_onnx    "${ONNC_EXTSRCDIR}/onnx"     "${ONNC_EXTDIR}/../external/install"
+  build_onnx    "${ONNC_EXTSRCDIR}/onnx"     "${ONNC_EXTDIR}"
 }
 
 function build_onnc
@@ -132,21 +132,18 @@ function build_onnc
     normal)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
-                          --with-skypat="${ONNC_EXTDIR}" \
-                          --with-onnx="${ONNC_EXTDIR}/../external/install"
+                          --with-skypat="${ONNC_EXTDIR}"
       ;;
     dbg)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
-                          --with-onnx="${ONNC_EXTDIR}/../external/install" \
                           --enable-unittest --enable-targets=x86,sophon,tg
       ;;
     rgn)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
-                          --with-onnx="${ONNC_EXTDIR}/../external/install" \
                           --enable-debug \
                           --enable-unittest \
                           --enable-regression
@@ -155,7 +152,6 @@ function build_onnc
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
-                          --with-onnx="${ONNC_EXTDIR}/../external/install" \
                           --enable-optimize
       ;;
     *)
