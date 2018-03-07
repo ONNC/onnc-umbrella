@@ -272,15 +272,19 @@ function build_onnx
   local INSTALLDIR=$2
   local NAME=$(basename "${SRCDIR}")
 
+  if [ ! -d "${INSTALLDIR}/lib" ]; then
+    show "create install directory at '${INSTALLDIR}'"
+    mkdir -p "${INSTALLDIR}/lib"
+  fi
+
+  show "python setup.py build"
+  $(python ${SRCDIR}/setup.py build --build-base=${INSTALLDIR})
+  local SOPATH=$(find -name onnx_cpp2py_export.so)
+
   show "pip installing ..."
   fail_panic "pip install ${NAME} failed." pip install "${SRCDIR}"
 
-  if [ ! -d "${INSTALLDIR}" ]; then
-    show "create install directory at '${INSTALLDIR}'"
-    mkdir -p "${INSTALLDIR}"
-  fi
-  local PYTHON_PATH=$(python -c "import onnx, os; print(os.path.dirname(onnx.__path__[0]))")
-  cp ${PYTHON_PATH}/onnx/onnx_cpp2py_export.so ${INSTALLDIR}/lib/libonnx.so
+  cp ${SOPATH} ${INSTALLDIR}/lib/libonnx.so
   show "finishing ..."
 }
 
