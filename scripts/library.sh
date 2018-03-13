@@ -320,7 +320,7 @@ function build_bmnet
   pushd ${EXTDIR}
   source ${EXTDIR}/build/envsetup.sh
   source ${EXTDIR}/build/envsetup_bmnet.sh
-  build_bmnet_all_bm1682
+  build_bmnet_all
   popd
 }
 
