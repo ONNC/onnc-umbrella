@@ -132,8 +132,8 @@ function build_onnc
     normal)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
-                          --with-skypat="${ONNC_EXTDIR}" \
-                          --with-onnx="${ONNC_EXTDIR}/../external/install"
+                          --with-onnx="${ONNC_EXTDIR}/../external/install" \
+                          --with-skypat="${ONNC_EXTDIR}"
       ;;
     dbg)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
@@ -145,8 +145,8 @@ function build_onnc
     rgn)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
-                          --with-skypat="${ONNC_EXTDIR}" \
                           --with-onnx="${ONNC_EXTDIR}/../external/install" \
+                          --with-skypat="${ONNC_EXTDIR}" \
                           --enable-debug \
                           --enable-unittest \
                           --enable-regression
@@ -154,8 +154,8 @@ function build_onnc
     opt)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
-                          --with-skypat="${ONNC_EXTDIR}" \
                           --with-onnx="${ONNC_EXTDIR}/../external/install" \
+                          --with-skypat="${ONNC_EXTDIR}" \
                           --enable-optimize
       ;;
     *)

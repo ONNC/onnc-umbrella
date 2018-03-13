@@ -269,7 +269,7 @@ function build_llvm
 function build_onnx
 {
   local SRCDIR="$1"
-  local INSTALLDIR=$2
+  local INSTALLDIR=$2  
   local NAME=$(basename "${SRCDIR}")
 
   if [ ! -d "${INSTALLDIR}/lib" ]; then
