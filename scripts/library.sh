@@ -272,7 +272,19 @@ function build_onnx
   local NAME=$(basename "${SRCDIR}")
 
   show "pip installing ..."
-  fail_panic "pip install ${NAME} failed." pip install "${SRCDIR}"
+  case "$(platform)" in
+  macosx)
+    # fix bug in python setuptools
+    LDSHARED="clang++ -dynamiclib -undefined dynamic_lookup" pip install "${SRCDIR}"
+    if [ $? != 0 ]; then
+      local ERROR="Failed to execute command: LDSHARED=\"clang++ -dynamiclib -undefined dynamic_lookup\" pip install \"${SRCDIR}\""
+      fatal "pip install ${NAME} failed." "${ERROR}"
+    fi
+    ;;
+  *)
+    fail_panic "pip install ${NAME} failed." pip install "${SRCDIR}"
+    ;;
+  esac
   show "finishing ..."
 }
 
