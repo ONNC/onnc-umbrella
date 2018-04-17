@@ -46,9 +46,10 @@ RUN sed -i 's/archive.ubuntu.com/debian.linux.org.tw/' /etc/apt/sources.list \
         python-pip \
         python-dev \
         python-setuptools \
+# for build
+        ninja-build \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y --no-install-recommends ninja-build
 RUN pip install protobuf
 
 USER user

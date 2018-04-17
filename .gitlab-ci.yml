@@ -1,4 +1,4 @@
-image: iclink/onnc_dev:test
+image: iclink/onnc_dev:1.1
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
