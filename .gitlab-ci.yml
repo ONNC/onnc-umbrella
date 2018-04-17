@@ -1,13 +1,27 @@
-image: "$CI_REGISTRY/$CI_BASE_IMAGE"
+image: iclink/onnc_dev:test
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
+    GIT_STRATEGY: clone
 
 stages:
   - build
+  - build_ninja
 
 build:
   stage: build
   script:
-    - ./docker/build.sh base
-    - ./docker/build.sh prebuilt-external prebuilt
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j$(nproc)
+    - make test
+
+build_ninja:
+  stage: build
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -G Ninja
+    - ninja
+    - ninja test
