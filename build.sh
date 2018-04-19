@@ -129,27 +129,24 @@ function build_onnc
   show "configuring ..."
   fail_panic "Autogen onnc failed." ${ONNC_SRCDIR}/autogen.sh
 
-  ONNX_DIR=`python -c "import onnx, os; print(os.path.dirname(onnx.__path__[0]))"`
-  fail_panic "ONNX not found." test ! -z "${ONNX_DIR}"
-
   case "${ONNC_MODE}" in
     normal)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
-                          --with-onnx="${ONNX_DIR}" \
+                          --with-onnx="${ONNC_EXTDIR}" \
                           --with-skypat="${ONNC_EXTDIR}"
       ;;
     dbg)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
-                          --with-onnx="${ONNX_DIR}" \
+                          --with-onnx="${ONNC_EXTDIR}" \
                           --enable-unittest --enable-targets=x86
       ;;
     rgn)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
-                          --with-onnx="${ONNX_DIR}" \
+                          --with-onnx="${ONNC_EXTDIR}" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --enable-debug \
                           --enable-unittest \

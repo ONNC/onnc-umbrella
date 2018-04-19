@@ -268,24 +268,56 @@ function build_llvm
 
 function build_onnx
 {
-  local SRCDIR="$1"
+  local ONNX_VERSION="ff7b3b4c"
+  local SRCDIR=$1
   local NAME=$(basename "${SRCDIR}")
+  local BUILDDIR=$(getabs "build-${NAME}")
+  local INSTALLDIR=$2
 
-  show "pip installing ..."
-  case "$(platform)" in
-  macosx)
-    # fix bug in python setuptools
-    LDSHARED="clang++ -dynamiclib -undefined dynamic_lookup" pip install "${SRCDIR}"
-    if [ $? != 0 ]; then
-      local ERROR="Failed to execute command: LDSHARED=\"clang++ -dynamiclib -undefined dynamic_lookup\" pip install \"${SRCDIR}\""
-      fatal "pip install ${NAME} failed." "${ERROR}"
-    fi
-    ;;
-  *)
-    fail_panic "pip install ${NAME} failed." pip install "${SRCDIR}"
-    ;;
-  esac
+  shift; shift
+
+  show "building ${NAME} ..."
+
+  if [ ! -d "${BUILDDIR}" ]; then
+    show "create build directory at '${BUILDDIR}'"
+    mkdir -p "${BUILDDIR}"
+  fi
+
+  pushd "${BUILDDIR}" > /dev/null
+
+  show "creating makefiles ..."
+
+  fail_panic "Cmake project - ${NAME} failed." \
+    cmake \
+    "-DCMAKE_BUILD_TYPE=Release" \
+    "-DCMAKE_INSTALL_PREFIX=${INSTALLDIR}" \
+    "${SRCDIR}"
+
+  local MAX_MAKE_JOBS=${MAX_MAKE_JOBS-2}
+  local PARALLEL_BUILD_FLAG=${MAX_MAKE_JOBS:+"-j${MAX_MAKE_JOBS}"}
+  show "making ... #jobs=${MAX_MAKE_JOBS}"
+  fail_panic "Make ${NAME} failed." ${MAKE} ${PARALLEL_BUILD_FLAG} all
+
+  # So far, ONNX doesn't provide install rule in CMakeList.txt. Copy
+  # archives to the install directory by our self.
+  show "installing ..."
+  rm -rf ${INSTALLDIR}/lib/libonnx.a ${INSTALLDIR}/lib/libonnx_proto.a ${INSTALLDIR}/include/onnx
+  cp ${BUILDDIR}/libonnx.a ${INSTALLDIR}/lib
+  cp ${BUILDDIR}/libonnx_proto.a ${INSTALLDIR}/lib
+  cp -r ${BUILDDIR}/onnx ${INSTALLDIR}/include
+  mkdir ${INSTALLDIR}/include/onnx/optimizer
+  mkdir ${INSTALLDIR}/include/onnx/passes
+  mkdir ${INSTALLDIR}/include/onnx/common
+  mkdir ${INSTALLDIR}/include/onnx/defs
+
+  cp ${SRCDIR}/onnx/*.h           ${INSTALLDIR}/include/onnx/
+  cp ${SRCDIR}/onnx/optimizer/*.h ${INSTALLDIR}/include/onnx/optimizer/
+  cp ${SRCDIR}/onnx/passes/*.h    ${INSTALLDIR}/include/onnx/passes/
+  cp ${SRCDIR}/onnx/common/*.h    ${INSTALLDIR}/include/onnx/common/
+  cp ${SRCDIR}/onnx/defs/*.h      ${INSTALLDIR}/include/onnx/defs/
+ 
   show "finishing ..."
+  popd > /dev/null
 }
 
 function build_bmtap
