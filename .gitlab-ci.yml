@@ -15,7 +15,7 @@ build:
     - cd build
     - cmake ..
     - make -j$(nproc)
-    - make test
+    - ctest -j$(nproc)
 
 build_ninja:
   stage: build
@@ -24,4 +24,4 @@ build_ninja:
     - cd build
     - cmake .. -G Ninja
     - ninja
-    - ninja test
+    - ctest -j$(nproc)
