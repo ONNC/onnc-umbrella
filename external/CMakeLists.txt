@@ -7,10 +7,10 @@ set_directory_properties(PROPERTIES EP_BASE ${CMAKE_CURRENT_BINARY_DIR})
 
 # build LLVM
 option(BUILD_LLVM "build llvm" OFF)
+option_enum(NAME BUILD_LLVM_VERSION HELP "llvm version" VALUE 5.0.1 6.0.0 CHECK BUILD_LLVM)
 if (BUILD_LLVM)
-    set(LLVM_VERSION 5.0.1 CACHE STRING "llvm version")
     ExternalProject_Add(llvm
-        URL https://releases.llvm.org/${LLVM_VERSION}/llvm-${LLVM_VERSION}.src.tar.xz
+        URL https://releases.llvm.org/${BUILD_LLVM_VERSION}/llvm-${BUILD_LLVM_VERSION}.src.tar.xz
         BUILD_ALWAYS ${BUILD_EXT_ALWAYS}
         CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
