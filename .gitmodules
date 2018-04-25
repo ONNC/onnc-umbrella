@@ -1,16 +1,9 @@
 [submodule "external/SkyPat"]
 	path = external/SkyPat
-	url = https://github.com/skymizer/SkyPat.git
+    url = https://github.com/skymizer/SkyPat.git
 [submodule "external/onnx"]
 	path = external/onnx
 	url = https://github.com/onnx/onnx.git
-[submodule "external/bmnet"]
-	path = external/bmnet
-	url = ../../bmsky/bmnet.git
-	branch = dev_bmtap
-[submodule "external/bmtap"]
-	path = external/bmtap
-	url = ../../bmsky/bmtap.git
-[submodule "external/build"]
-	path = external/build
-	url = ../../bmsky/bmbuild.git
+[submodule "external/bmtap2"]
+	path = external/bmtap2
+	url = ../../bmsky/bmtap2.git
