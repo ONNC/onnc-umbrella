@@ -2,11 +2,14 @@ image: iclink/onnc_dev:1.1
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
-    GIT_STRATEGY: clone
 
 stages:
   - build
   - build_ninja
+
+before_script:
+  - git clean -ffdx
+  - git submodule foreach git clean -ffdx
 
 build:
   stage: build

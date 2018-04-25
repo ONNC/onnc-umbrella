@@ -1,0 +1,48 @@
+FROM ubuntu:16.04
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl \
+        sudo \
+# for bmkernel
+        build-essential \
+        gcc-arm-none-eabi \
+        libnewlib-arm-none-eabi \
+        libboost-all-dev \
+        pkg-config \
+# for caffe2
+        libgoogle-glog-dev \
+        libgtest-dev \
+        libiomp-dev \
+        libleveldb-dev \
+        liblmdb-dev \
+        libopencv-dev \
+        libopenmpi-dev \
+        libsnappy-dev \
+        libprotobuf-dev \
+        openmpi-bin \
+        openmpi-doc \
+        libgflags-dev \
+# for skypat
+        automake \
+        libtool \
+# for llvm
+        xz-utils \
+        make \
+        cmake \
+        g++ \
+        python \
+# for onnx
+        git \
+        protobuf-compiler \
+        libprotoc-dev \
+        python-pip \
+        python-dev \
+        python-setuptools \
+# for build
+        ninja-build \
+        cmake-curses-gui \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install protobuf
+
