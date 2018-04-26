@@ -20,6 +20,21 @@ build:
     - make -j$(nproc)
     - ctest -j$(nproc)
 
+build_separate:
+  stage: build
+  script:
+    - mkdir build_external
+    - pushd build_external
+    -   cmake ../external
+    -   make -j$(nproc)
+    - popd
+    - mkdir build_src
+    - pushd build_src
+    -   cmake ../src -DONNX_INSTALL_DIR=$PWD/../build_external/Install/onnx -DSKYPAT_INSTALL_DIR=$PWD/../build_external/Install/skypat
+    -   make -j$(nproc)
+    -   ctest -j$(nproc)
+    - popd
+
 build_ninja:
   stage: build
   script:
