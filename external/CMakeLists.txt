@@ -36,21 +36,15 @@ ExternalProject_Add_Step(skypat autoreconf
 add_dependencies(build_external skypat)
 
 # build ONNX
-find_package(PythonLibs REQUIRED)
-find_package(PythonInterp REQUIRED)
 ExternalProject_Add(onnx
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/onnx
     INSTALL_COMMAND cmake -E echo "Skipping install step."
     BUILD_ALWAYS ${BUILD_EXT_ALWAYS}
     BUILD_BYPRODUCTS Install/onnx/lib/libonnx.a Install/onnx/lib/libonnx_proto.a # for ninja
     CMAKE_ARGS
-    -DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE_DIRS}
-    -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
-    -DBUILD_ONNX_PYTHON=ON
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>)
 ExternalProject_Add_Step(onnx install_hack 
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different onnx_cpp2py_export.so libonnx_cpp2py_export${CMAKE_SHARED_LIBRARY_SUFFIX}
     COMMAND mkdir -p <INSTALL_DIR>/lib <INSTALL_DIR>/include
     COMMAND ${CMAKE_COMMAND} -E copy_if_different <BINARY_DIR>/libonnx.a <INSTALL_DIR>/lib
     COMMAND ${CMAKE_COMMAND} -E copy_if_different <BINARY_DIR>/libonnx_proto.a <INSTALL_DIR>/lib
