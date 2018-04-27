@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ONNC_EXTERNAL)
+project(ONNC_EXTERNAL NONE)
 
 include(ExternalProject)
 include(${ONNC_EXTERNAL_SOURCE_DIR}/../src/cmake/option.cmake)

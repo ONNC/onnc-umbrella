@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(ONNC_UMBRELLA)
+project(ONNC_UMBRELLA NONE)
 
 enable_testing()
 
