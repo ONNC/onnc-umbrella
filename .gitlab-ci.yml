@@ -30,7 +30,8 @@ build_separate:
     - popd
     - mkdir build_src
     - pushd build_src
-    -   cmake ../src -DONNX_INSTALL_DIR=$PWD/../build_external/Install/onnx -DSKYPAT_INSTALL_DIR=$PWD/../build_external/Install/skypat
+    - cmake ../src -DONNX_INSTALL_DIR=$PWD/../build_external/Install/onnx -DSKYPAT_INSTALL_DIR=$PWD/../build_external/Install/skypat
+      -DBM_INSTALL_DIR=$PWD/../external/install -DBMTAP_SOURCE_DIR=$PWD/../external/bmtap -DBMNET_SOURCE_DIR=$PWD/../external/bmnet -DBMNET_BINARY_DIR=$PWD/../build_external/Build/bmnet
     -   make -j$(nproc)
     -   ctest -j$(nproc)
     - popd

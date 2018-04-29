@@ -53,3 +53,33 @@ ExternalProject_Add_Step(onnx install_hack
     WORKING_DIRECTORY <BINARY_DIR>
     DEPENDEES build)
 add_dependencies(build_external onnx)
+
+option(TARGET_TG "" ON)
+if (TARGET_TG)
+    # build bmtap
+    ExternalProject_Add(bmtap
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bmtap
+        INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/install
+        BUILD_BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/install/lib/libbmtap.a # for ninja
+        CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-chip=bm1680 --enable-bmkernel-host-api=yes --enable-fw-api=bmkernel)
+    ExternalProject_Add_Step(bmtap autoreconf
+        COMMAND autoreconf -i
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bmtap
+        DEPENDERS configure)
+
+    ExternalProject_Get_Property(bmtap INSTALL_DIR)
+    set(BMTAP_INSTALL_DIR ${INSTALL_DIR})
+
+    # build bmnet
+    ExternalProject_Add(bmnet
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bmnet
+        INSTALL_DIR ${BMTAP_INSTALL_DIR}
+        BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/Build/bmnet/src/targets/.libs/libtargets.a # for ninja
+        CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>  --enable-debug)
+    ExternalProject_Add_Step(bmnet autoreconf
+        COMMAND autoreconf -i
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bmnet
+        DEPENDERS configure)
+    add_dependencies(bmnet bmtap)
+    add_dependencies(build_external bmnet)
+endif()
