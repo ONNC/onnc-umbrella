@@ -1,3 +1,5 @@
+[![coverage report](https://git-bitmain.skymizer.com/bmsky/onnc/badges/master/coverage.svg)](https://git-bitmain.skymizer.com/bmsky/onnc/commits/master)
+
 # ONNC Umbrella
 
 ## Introduction
