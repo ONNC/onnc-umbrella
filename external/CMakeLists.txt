@@ -3,6 +3,8 @@ project(ONNC_EXTERNAL NONE)
 
 include(ExternalProject)
 include(${ONNC_EXTERNAL_SOURCE_DIR}/../src/cmake/option.cmake)
+include(${ONNC_EXTERNAL_SOURCE_DIR}/../src/cmake/onnc_target.cmake)
+enum_onnc_targets()
 
 option(BUILD_EXT_ALWAYS "always build external project" OFF)
 
@@ -54,7 +56,6 @@ ExternalProject_Add_Step(onnx install_hack
     DEPENDEES build)
 add_dependencies(build_external onnx)
 
-option(TARGET_TG "" ON)
 if (TARGET_TG)
     # build bmtap
     ExternalProject_Add(bmtap
