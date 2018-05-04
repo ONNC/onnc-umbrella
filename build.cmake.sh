@@ -2,6 +2,7 @@
 
 mkdir -p build
 pushd build
-    cmake ..
+    cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/install
     make -j4
+    make install
 popd
