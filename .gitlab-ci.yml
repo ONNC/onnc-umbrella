@@ -1,13 +1,46 @@
-image: "$CI_REGISTRY/$CI_BASE_IMAGE"
+image: iclink/onnc_dev:1.1
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
 
 stages:
   - build
+  - build_ninja
+
+before_script:
+  - git clean -ffdx
+  - git submodule foreach git clean -ffdx
 
 build:
   stage: build
   script:
-    - ./docker/build.sh base
-    - ./docker/build.sh prebuilt-external prebuilt
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j$(nproc)
+    - ctest -j$(nproc)
+
+build_separate:
+  stage: build
+  script:
+    - mkdir build_external
+    - pushd build_external
+    -   cmake ../external
+    -   make -j$(nproc)
+    - popd
+    - mkdir build_src
+    - pushd build_src
+    - cmake ../src -DONNX_INSTALL_DIR=$PWD/../build_external/Install/onnx -DSKYPAT_INSTALL_DIR=$PWD/../build_external/Install/skypat
+      -DBM_INSTALL_DIR=$PWD/../external/install -DBMTAP_SOURCE_DIR=$PWD/../external/bmtap -DBMNET_SOURCE_DIR=$PWD/../external/bmnet -DBMNET_BINARY_DIR=$PWD/../build_external/Build/bmnet
+    -   make -j$(nproc)
+    -   ctest -j$(nproc)
+    - popd
+
+build_ninja:
+  stage: build
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -G Ninja
+    - ninja
+    - ctest -j$(nproc)

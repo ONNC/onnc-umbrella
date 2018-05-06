@@ -1,13 +1,6 @@
 FROM ubuntu:16.04
 
-RUN groupadd --gid 1000 user \
-    && useradd --uid 1000 --gid user --shell /bin/bash --create-home user \
-    && mkdir -p /etc/sudoers.d \
-    && echo 'user ALL=(ALL:ALL) NOPASSWD:ALL' >> /etc/sudoers.d/user \
-    && chmod 440 /etc/sudoers.d/user
-
-RUN sed -i 's/archive.ubuntu.com/debian.linux.org.tw/' /etc/apt/sources.list \
-    && apt-get update \
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         sudo \
@@ -48,8 +41,8 @@ RUN sed -i 's/archive.ubuntu.com/debian.linux.org.tw/' /etc/apt/sources.list \
         python-setuptools \
 # for build
         ninja-build \
+        cmake-curses-gui \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install protobuf
 
-USER user
