@@ -9,7 +9,7 @@ stages:
 
 before_script:
   - git clean -ffdx
-  - git submodule foreach git clean -ffdx
+  - git submodule foreach --recursive git clean -ffdx
 
 build:
   stage: build
