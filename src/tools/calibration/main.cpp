@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include <cstdlib>
+#include "insertDummpyCtable.h"
 #include <iostream>
 #include <memory>
 #include <onnc/Core/PassManager.h>
@@ -31,5 +31,6 @@ int main(int pArgc, char *pArgv[])
   }
   PassManager pm;
   pm.add(createONNCModulePrinterPass());
+  pm.add(createInsertDummpyCtablePass());
   pm.run(*module);
 }
