@@ -7,12 +7,14 @@
 //===----------------------------------------------------------------------===//
 
 #include "insertDummpyCtable.h"
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <onnc/Core/PassManager.h>
 #include <onnc/IR/Module.h>
 #include <onnc/IR/ONNCModulePrinter.h>
 #include <onnc/IRReader/ONNXReader.h>
+#include <onnx/common/ir_pb_converter.h>
 
 using namespace onnc;
 
@@ -29,8 +31,39 @@ int main(int pArgc, char *pArgv[])
   if (!err.isGood()) {
     return EXIT_FAILURE;
   }
-  PassManager pm;
-  pm.add(createONNCModulePrinterPass());
-  pm.add(createInsertDummpyCtablePass());
+  onnc::PassManager pm;
+  pm.add(::onnc::createONNCModulePrinterPass());
+  pm.add(::onnc::createInsertDummpyCtablePass());
   pm.run(*module);
+
+  // FIXME add IRWritter
+  // write the new onnx model back to disk
+  const char *fileName = "new.onnx";
+  ::onnx::ModelProto modelProto;
+  // init IR version
+  modelProto.set_ir_version(3);
+  // init graph
+  ::onnx::ExportModelProto(&modelProto, module->getGraphIR());
+  // init metadata
+  for (auto const &data : module->getMetaData()) {
+    auto *metadata_props = modelProto.add_metadata_props();
+    metadata_props->set_key(data.first);
+    metadata_props->set_value(data.second);
+  }
+  {
+    std::fstream output(fileName,
+                        std::ios::out | std::ios::trunc | std::ios::binary);
+    modelProto.SerializeToOstream(&output);
+  }
+
+  // dump new onnx model
+  std::cout << "after InsertDummpyCtable" << std::endl;
+  std::unique_ptr<onnc::Module> module2(
+      reader.parse(onnc::Path(fileName), err));
+  if (!err.isGood()) {
+    return EXIT_FAILURE;
+  }
+  ::onnc::PassManager pm2;
+  pm2.add(::onnc::createONNCModulePrinterPass());
+  pm2.run(*module2);
 }
