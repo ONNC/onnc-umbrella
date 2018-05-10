@@ -1,24 +1,13 @@
-//===- INSERT_DUMMPY_CTABLE.h ---------------------------------------------===//
-//
-//                             The ONNC Project
-//
-// See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
-#ifndef INSERT_DUMMPY_CTABLE_H
-#define INSERT_DUMMPY_CTABLE_H
-
+#include "insertDummyCtable.h"
 #include "common_calibration.pb.h"
 #include <onnc/Core/ModulePass.h>
 #include <onnx/common/ir.h>
 
-namespace onnc {
-ModulePass *createInsertDummpyCtablePass();
-}
+using namespace onnc;
 
 namespace {
 
-class InsertDummpyCtable : public onnc::ModulePass
+class InsertDummyCtable : public ModulePass
 {
 
   void insertLayerName(::onnx::Node *pNode)
@@ -31,7 +20,7 @@ class InsertDummpyCtable : public onnc::ModulePass
 
 public:
   static char ID;
-  InsertDummpyCtable() : ModulePass(ID) {}
+  InsertDummyCtable() : ModulePass(ID) {}
 
   Pass::ReturnType runOnModule(onnc::Module &pModule) override
   {
@@ -66,13 +55,11 @@ private:
   NetCalibrationParameter m_NetCtableParam;
 };
 
-char InsertDummpyCtable::ID = 0;
+char InsertDummyCtable::ID = 0;
 
 } // anonymous namespace
 
-onnc::ModulePass *onnc::createInsertDummpyCtablePass()
+ModulePass *onnc::createInsertDummyCtablePass()
 {
-  return new InsertDummpyCtable();
+  return new InsertDummyCtable();
 }
-
-#endif // INSERT_DUMMPY_CTABLE_H

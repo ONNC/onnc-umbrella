@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "insertDummpyCtable.h"
+#include "insertDummyCtable.h"
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -33,10 +33,10 @@ int main(int pArgc, char *pArgv[])
   }
   onnc::PassManager pm;
   pm.add(::onnc::createONNCModulePrinterPass());
-  pm.add(::onnc::createInsertDummpyCtablePass());
+  pm.add(::onnc::createInsertDummyCtablePass());
   pm.run(*module);
 
-  // FIXME add IRWritter
+  // FIXME add ONNXIRWritter
   // write the new onnx model back to disk
   const char *fileName = "new.onnx";
   ::onnx::ModelProto modelProto;
@@ -57,7 +57,7 @@ int main(int pArgc, char *pArgv[])
   }
 
   // dump new onnx model
-  std::cout << "after InsertDummpyCtable" << std::endl;
+  std::cout << "after InsertDummyCtable" << std::endl;
   std::unique_ptr<onnc::Module> module2(
       reader.parse(onnc::Path(fileName), err));
   if (!err.isGood()) {
