@@ -1,0 +1,8 @@
+FROM iclink/onnc_dev:latest
+
+RUN apt-get update && apt-get install -y \
+        gdb\
+        cgdb\
+        vim\
+        clang-5.0\
+        clang-tidy-5.0

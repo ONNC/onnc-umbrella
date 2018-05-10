@@ -27,3 +27,30 @@
     Coming soon...
   5. `push-image.sh`
     Coming soon...
+
+# Workflow 2 with CMake
+## start
+```
+$ docker pull iclink/onnc_dev:work
+$ docker run -it --rm iclink/onnc_dev:work
+```
+## docker image management
+  1. Dockerfile.dev
+    + purpose
+      + for minimal build, used by gitlab CI 
+      + see onnc/.gitlab-ci.yml
+    + build image and push to Docker Hub
+
+      ```
+      $ ./image-build.sh
+      ```
+
+  2. Dockerfile.dev.work
+    + purpose
+      + offer daily tools for work, clang-tidy, cgdb, etc.
+      + depend on Dockerfile.dev
+    + build image and push to Docker Hub
+
+      ```
+      $ ./image-build-work.sh
+      ```
