@@ -17,5 +17,6 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/common_calibration.pb.cc
 add_executable(calibration
     ${CMAKE_CURRENT_BINARY_DIR}/common_calibration.pb.cc
     insertDummyCtable.cpp
-    main.cpp)
+    main.cpp
+    quantizeWeight.cpp)
 target_link_libraries(calibration libonnc ${ONNX_LIBRARIES} ${PROTOBUF_LIBRARIES}) 

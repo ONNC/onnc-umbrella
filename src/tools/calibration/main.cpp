@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "insertDummyCtable.h"
+#include "quantizeWeight.h"
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -69,6 +70,14 @@ int main(int pArgc, char *pArgv[])
     }
     ::onnc::PassManager pm;
     pm.add(::onnc::createONNCModulePrinterPass());
+    pm.run(*module);
+  }
+
+  // test quantizeWeight
+  {
+    onnc::PassManager pm;
+    pm.add(onnc::createQuantizeWeightPass());
+    pm.add(onnc::createONNCModulePrinterPass());
     pm.run(*module);
   }
 }
