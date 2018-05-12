@@ -75,6 +75,7 @@ int main(int pArgc, char *pArgv[])
 
   // test quantizeWeight
   {
+    std::cout << "after QuantizeWeight" << std::endl;
     onnc::PassManager pm;
     pm.add(onnc::createQuantizeWeightPass());
     pm.add(onnc::createONNCModulePrinterPass());

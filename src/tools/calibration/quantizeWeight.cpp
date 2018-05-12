@@ -1,4 +1,6 @@
 #include "quantizeWeight.h"
+#include <algorithm>
+#include <cstddef>
 #include <onnc/Core/ModulePass.h>
 #include <onnx/common/ir.h>
 #include <onnx/common/tensor.h>
@@ -6,14 +8,6 @@
 using namespace onnc;
 
 namespace {
-
-const size_t getDimCount(const std::vector< ::onnx::Dimension> &pDim)
-{
-  size_t s = 1;
-  for (auto &dim : pDim)
-    s *= dim.dim;
-  return s;
-}
 
 const size_t getTotalCount(const std::vector<int64_t> &pSize)
 {
@@ -23,37 +17,68 @@ const size_t getTotalCount(const std::vector<int64_t> &pSize)
   return s;
 }
 
-void copyTensor(::onnx::Tensor &pNewTensor, const ::onnx::Tensor &pOldTensor,
+void copyTensor(::onnx::Tensor &pDstTensor, const ::onnx::Tensor &pSrcTensor,
                 const std::string &pValueName,
                 const ::onnx::TensorProto_DataType pDataType)
 {
   // copy sizes
-  auto &newTensorSize = pNewTensor.sizes();
-  newTensorSize = pOldTensor.sizes();
+  auto &newTensorSize = pDstTensor.sizes();
+  newTensorSize = pSrcTensor.sizes();
   // copy dataType
-  auto &newTensorType = pNewTensor.elem_type();
+  auto &newTensorType = pDstTensor.elem_type();
   newTensorType = pDataType;
   // copy segment info
-  if (pOldTensor.is_segment()) {
-    pNewTensor.set_segment_begin_and_end(pOldTensor.segment_begin(),
-                                         pOldTensor.segment_end());
+  if (pSrcTensor.is_segment()) {
+    pDstTensor.set_segment_begin_and_end(pSrcTensor.segment_begin(),
+                                         pSrcTensor.segment_end());
   }
   // copy name
-  if (pOldTensor.hasName()) {
-    pNewTensor.setName(pOldTensor.name());
+  if (pSrcTensor.hasName()) {
+    pDstTensor.setName(pSrcTensor.name());
   }
 }
 
 template <class T>
-void copyTensorData(::onnx::Tensor &pNewTensor,
-                    const std::vector<T> &pDataVector)
+void copyData2Tensor(::onnx::Tensor &pTensor, const std::vector<T> &pDataVector)
 {
-  // onnx does not support int8 tensor
-  auto &newTensorData = pNewTensor.int32s();
-  newTensorData.reserve(pDataVector.size());
+  // ::onnx does not support int8 tensor
+  auto &tensorData = pTensor.int32s();
+  tensorData.reserve(pDataVector.size());
   for (auto &data : pDataVector) {
-    newTensorData.push_back(data);
+    tensorData.push_back(data);
   }
+}
+
+template <class T>
+void copyTensor2Data(std::vector<T> &pDataVector, const ::onnx::Tensor &pTensor)
+{
+  assert("only support to quantize float type" &&
+         ::onnx::TensorProto_DataType_FLOAT == pTensor.elem_type());
+  size_t count = getTotalCount(pTensor.sizes());
+  pDataVector.reserve(count);
+  if (pTensor.raw().empty()) {
+    auto floats = pTensor.floats();
+    for (auto f : floats) {
+      // quantize, just for test
+      pDataVector.push_back((char)f);
+    }
+  } else {
+    const std::string rawString = pTensor.raw();
+    const char *raw = rawString.c_str();
+    for (int i = 0; i < rawString.length(); i += sizeof(float) / sizeof(char)) {
+      auto *f = reinterpret_cast<const float *>(&raw[i]);
+      // quantize, just for test
+      pDataVector.push_back((char)*f);
+    }
+  }
+}
+
+const ::onnx::Tensor &getTensor(std::string pName, const ::onnx::Graph &pGraph)
+{
+  auto initNames = const_cast< ::onnx::Graph &>(pGraph).initializer_names();
+  std::ptrdiff_t idx = std::distance(
+      initNames.begin(), std::find(initNames.begin(), initNames.end(), pName));
+  return const_cast< ::onnx::Graph &>(pGraph).initializers()[idx];
 }
 
 class quantizeWeight : public ModulePass
@@ -72,57 +97,58 @@ public:
   Pass::ReturnType runOnModule(Module &pModule) override;
 
 private:
-  void genRandomQuantizedWeight(const ::onnx::Graph &pGraph,
-                                QuantizedInt8Map &pQuantizedInt8,
-                                QuantizedInt16Map &pQuantizedInt16);
+  void genQuantizedWeight(const ::onnx::Graph &pGraph,
+                          QuantizedInt8Map &pQuantizedInt8,
+                          QuantizedInt16Map &pQuantizedInt16);
 };
 
-void quantizeWeight::genRandomQuantizedWeight(
-    const ::onnx::Graph &pGraph, QuantizedInt8Map &pQuantizedInt8,
-    QuantizedInt16Map &pQuantizedInt16)
+void quantizeWeight::genQuantizedWeight(const ::onnx::Graph &pGraph,
+                                        QuantizedInt8Map &pQuantizedInt8,
+                                        QuantizedInt16Map &pQuantizedInt16)
 {
-  // weight name
-  const std::unordered_set<std::string> tensorNames(
-      const_cast< ::onnx::Graph &>(pGraph).initializer_names().begin(),
-      const_cast< ::onnx::Graph &>(pGraph).initializer_names().end());
-
   for (auto it = pGraph.begin(), ie = pGraph.end(); it != ie; ++it) {
     auto *node = *it;
     auto symbol = node->kind();
     if (symbol == ::onnx::Symbol("Conv")) {
       auto inputs = node->inputs();
-      // weight
-      const ::onnx::Value *weight = inputs[1];
-      size_t weightCount = getDimCount(weight->sizes());
-      pQuantizedInt8.emplace(weight->uniqueName(),
-                             std::vector<int8_t>(weightCount, 'W'));
-      assert(0 != tensorNames.count(weight->uniqueName()));
-      // bias
+      // inputs[1] is weight
+      {
+        const std::string tensorName = inputs[1]->uniqueName();
+        const ::onnx::Tensor &tensor = getTensor(tensorName, pGraph);
+        std::vector<int8_t> int8DataVector;
+        copyTensor2Data(int8DataVector, tensor);
+        pQuantizedInt8.emplace(tensorName, int8DataVector);
+      }
+
+      // inputs[2] is bias
       if (3 == inputs.size()) {
-        const ::onnx::Value *bias = inputs[2];
-        size_t biasCount = getDimCount(bias->sizes());
-        pQuantizedInt16.emplace(bias->uniqueName(),
-                                std::vector<int16_t>(biasCount, 'B'));
-        assert(0 != tensorNames.count(bias->uniqueName()));
+        const std::string tensorName = inputs[2]->uniqueName();
+        const ::onnx::Tensor &tensor = getTensor(tensorName, pGraph);
+        std::vector<int16_t> int16DataVector;
+        copyTensor2Data(int16DataVector, tensor);
+        pQuantizedInt16.emplace(tensorName, int16DataVector);
       }
 
     } else if (symbol == ::onnx::Symbol("MaxPool")) {
       continue;
     } else if (symbol == ::onnx::Symbol("Gemm")) {
       auto inputs = node->inputs();
-      // weight
-      const ::onnx::Value *weight = inputs[1];
-      size_t weightCount = getDimCount(weight->sizes());
-      pQuantizedInt8.emplace(weight->uniqueName(),
-                             std::vector<int8_t>(weightCount, 'F'));
-      assert(0 != tensorNames.count(weight->uniqueName()));
-      // bias
+      // inputs[1] is weight
+      {
+        const std::string tensorName = inputs[1]->uniqueName();
+        const ::onnx::Tensor &tensor = getTensor(tensorName, pGraph);
+        std::vector<int8_t> int8DataVector;
+        copyTensor2Data(int8DataVector, tensor);
+        pQuantizedInt8.emplace(tensorName, int8DataVector);
+      }
+
+      // inputs[2] is bias
       if (3 == inputs.size()) {
-        const ::onnx::Value *bias = inputs[2];
-        size_t biasCount = getDimCount(bias->sizes());
-        pQuantizedInt16.emplace(bias->uniqueName(),
-                                std::vector<int16_t>(biasCount, 'B'));
-        assert(0 != tensorNames.count(bias->uniqueName()));
+        const std::string tensorName = inputs[2]->uniqueName();
+        const ::onnx::Tensor &tensor = getTensor(tensorName, pGraph);
+        std::vector<int16_t> int16DataVector;
+        copyTensor2Data(int16DataVector, tensor);
+        pQuantizedInt16.emplace(tensorName, int16DataVector);
       }
     } else if (symbol == ::onnx::Symbol("Relu")) {
       continue;
@@ -143,7 +169,7 @@ Pass::ReturnType quantizeWeight::runOnModule(Module &pModule)
   // generate radom quantized weight
   QuantizedInt8Map quantizedInt8;
   QuantizedInt16Map quantizedInt16;
-  genRandomQuantizedWeight(*graph, quantizedInt8, quantizedInt16);
+  genQuantizedWeight(*graph, quantizedInt8, quantizedInt16);
 
   // update elemType
   for (auto input : graph->inputs()) {
@@ -178,7 +204,7 @@ Pass::ReturnType quantizeWeight::runOnModule(Module &pModule)
                  ::onnx::TensorProto_DataType_INT8);
       assert(quantizedInt8[valueName].size() ==
              getTotalCount(oldTensor.sizes()));
-      copyTensorData(newTensor, quantizedInt8[valueName]);
+      copyData2Tensor(newTensor, quantizedInt8[valueName]);
       valueTensorMap.emplace(valueName, newTensor);
       continue;
     } else if (1 == quantizedInt16.count(valueName)) {
@@ -187,7 +213,7 @@ Pass::ReturnType quantizeWeight::runOnModule(Module &pModule)
                  ::onnx::TensorProto_DataType_INT16);
       assert(quantizedInt16[valueName].size() ==
              getTotalCount(oldTensor.sizes()));
-      copyTensorData(newTensor, quantizedInt16[valueName]);
+      copyData2Tensor(newTensor, quantizedInt16[valueName]);
       valueTensorMap.emplace(valueName, newTensor);
       continue;
     }
