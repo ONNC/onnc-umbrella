@@ -6,6 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "ONNXOptimizer.h"
 #include "insertDummyCtable.h"
 #include "quantizeWeight.h"
 #include <fstream>
@@ -70,6 +71,15 @@ int main(int pArgc, char *pArgv[])
     std::cout << "after QuantizeWeight" << std::endl;
     onnc::PassManager pm;
     pm.add(onnc::createQuantizeWeightPass());
+    pm.add(onnc::createONNCModulePrinterPass());
+    pm.run(*module);
+  }
+
+  // test onnx optimizer
+  {
+    std::cout << "after onnx optimizer pass" << std::endl;
+    onnc::PassManager pm;
+    pm.add(onnc::createONNXOptimizerPass());
     pm.add(onnc::createONNCModulePrinterPass());
     pm.run(*module);
   }
