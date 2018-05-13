@@ -17,6 +17,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/common_calibration.pb.cc
 add_executable(calibration
     ${CMAKE_CURRENT_BINARY_DIR}/common_calibration.pb.cc
     ONNXOptimizer.cpp
+    ONNXShapeInference.cpp
     insertDummyCtable.cpp
     main.cpp
     quantizeWeight.cpp)
