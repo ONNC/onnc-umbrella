@@ -29,22 +29,24 @@ int main(int pArgc, char *pArgv[])
     return EXIT_FAILURE;
   }
 
-  // Run calibration pass.
-  {
-    onnc::Module module;
-    onnc::PassManager pm;
-    // FIXME: Feed optimized onnx model into Calibration pass.
-    pm.add(onnc::createCalibrationPass(pArgv[1]));
-    pm.run(module);
-  }
-
   onnc::onnx::Reader reader;
   onnc::SystemError err;
   std::unique_ptr<onnc::Module> module(reader.parse(onnc::Path(pArgv[1]), err));
+
+  if (!err.isGood()) {
+    return EXIT_FAILURE;
+  }
+
+  // Run calibration pass.
   {
-    if (!err.isGood()) {
-      return EXIT_FAILURE;
-    }
+    onnc::PassManager pm;
+    // FIXME: Feed optimized onnx model into Calibration pass.
+    pm.add(onnc::createONNCModulePrinterPass());
+    pm.add(onnc::createCalibrationPass());
+    pm.run(*module);
+  }
+
+  {
     onnc::PassManager pm;
     pm.add(::onnc::createONNCModulePrinterPass());
     pm.add(::onnc::createInsertDummyCtablePass());

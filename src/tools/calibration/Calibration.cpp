@@ -7,6 +7,7 @@
 //===----------------------------------------------------------------------===//
 #include <onnc/ADT/Color.h>
 #include <onnc/Core/ModulePass.h>
+#include <onnc/IR/ONNXUtils.h>
 #include <onnc/Support/IOStream.h>
 
 #include "Calibration.h"
@@ -248,9 +249,8 @@ Pass::ReturnType Calibration::runOnModule(Module &pModule)
   // FIXME: Sould be specified by user.
   constexpr int iteration = 5;
 
-  std::ifstream ifs(m_FileName);
-  std::string onnxStr((std::istreambuf_iterator<char>(ifs)),
-                      std::istreambuf_iterator<char>());
+  std::string onnxStr;
+  ::onnc::SerializeToString(onnxStr, pModule);
 
   // Create caffe2 backend.
   auto *backend = new caffe2::onnx::Caffe2Backend(nullptr);
@@ -289,7 +289,4 @@ Pass::ReturnType Calibration::runOnModule(Module &pModule)
 } // namespace onnc
 
 char Calibration::ID = 0;
-ModulePass *onnc::createCalibrationPass(std::string const &pFilename)
-{
-  return new Calibration(pFilename);
-}
+ModulePass *onnc::createCalibrationPass() { return new Calibration(); }

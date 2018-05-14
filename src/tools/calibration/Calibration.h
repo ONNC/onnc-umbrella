@@ -16,7 +16,7 @@
 #include "common_calibration.pb.h"
 
 namespace onnc {
-ModulePass *createCalibrationPass(std::string const &pFilename);
+ModulePass *createCalibrationPass();
 }
 
 namespace onnc {
@@ -28,10 +28,7 @@ class Calibration : public ModulePass
 {
 public:
   static char ID;
-  Calibration(std::string const &pFilename)
-      : ModulePass(ID), m_FileName(pFilename)
-  {
-  }
+  Calibration() : ModulePass(ID) {}
 
   Pass::ReturnType runOnModule(Module &pModule) override;
 
@@ -55,8 +52,6 @@ private:
   void Conv(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef);
 
 private:
-  const std::string m_FileName;
-
   caffe2::Workspace *m_Workspace;
 
   using QWeightData = std::unordered_map<std::string, std::vector<int8_t> >;
