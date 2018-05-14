@@ -27,7 +27,7 @@ void Calibration::Conv(const OperatorDef &pOp, caffe2::NetDef &pDef)
   if (pOp.input_size() == 3) {
     const string &biasName = pOp.input(2);
     auto bBlob = m_Workspace->GetBlob(biasName);
-    quantizeBias(bBlob, 128, thresY, rightShift, weightName);
+    quantizeBias(bBlob, 128, thresY, rightShift, biasName);
   }
 
   // Setup Ctable parameters.
