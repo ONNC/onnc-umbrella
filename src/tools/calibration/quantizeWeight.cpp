@@ -65,7 +65,8 @@ void copyTensor2Data(std::vector<T> &pDataVector, const ::onnx::Tensor &pTensor)
   } else {
     const std::string rawString = pTensor.raw();
     const char *raw = rawString.c_str();
-    for (int i = 0; i < rawString.length(); i += sizeof(float) / sizeof(char)) {
+    for (size_t i = 0; i < rawString.length();
+         i += sizeof(float) / sizeof(char)) {
       auto *f = reinterpret_cast<const float *>(&raw[i]);
       // quantize, just for test
       pDataVector.push_back((char)*f);
@@ -195,7 +196,7 @@ Pass::ReturnType quantizeWeight::runOnModule(::onnc::Module &pModule)
   std::unordered_map<std::string, ::onnx::Tensor> valueTensorMap;
   const std::vector< ::onnx::Tensor> initTensors = graph->initializers();
   const std::vector<std::string> tensorNames = graph->initializer_names();
-  for (int i = 0; i < initTensors.size(); ++i) {
+  for (size_t i = 0; i < initTensors.size(); ++i) {
     auto valueName = tensorNames[i];
     auto oldTensor = initTensors[i];
     if (1 == quantizedInt8.count(valueName)) {

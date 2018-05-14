@@ -22,6 +22,42 @@
 using namespace onnc;
 using namespace caffe2;
 
+namespace {
+
+void copyTensor(::onnx::Tensor &pDstTensor, const ::onnx::Tensor &pSrcTensor,
+                const std::string &pValueName,
+                const ::onnx::TensorProto_DataType pDataType)
+{
+  // copy sizes
+  auto &newTensorSize = pDstTensor.sizes();
+  newTensorSize = pSrcTensor.sizes();
+  // copy dataType
+  auto &newTensorType = pDstTensor.elem_type();
+  newTensorType = pDataType;
+  // copy segment info
+  if (pSrcTensor.is_segment()) {
+    pDstTensor.set_segment_begin_and_end(pSrcTensor.segment_begin(),
+                                         pSrcTensor.segment_end());
+  }
+  // copy name
+  if (pSrcTensor.hasName()) {
+    pDstTensor.setName(pSrcTensor.name());
+  }
+}
+
+template <class T>
+void copyData2Tensor(::onnx::Tensor &pTensor, const std::vector<T> &pDataVector)
+{
+  // onnx does not support int8 tensor
+  auto &tensorData = pTensor.int32s();
+  tensorData.reserve(pDataVector.size());
+  for (auto &data : pDataVector) {
+    tensorData.push_back(data);
+  }
+}
+
+} // anonymous namespace
+
 namespace onnc {
 static int getRightShift(Blob *pBlob, float pScale)
 {
@@ -101,7 +137,7 @@ void Calibration::quantizeWeight(Blob *pBlob, float pThresX, float pThresY,
       float fWeight =
           floor(probs[i] * ((pThresX / pThresY) * shiftScale) + 0.5);
       int8_t qWeight = saturate<int8_t>((int)fWeight);
-      m_QWeights[pName][i] = qWeight;
+      m_QWeights[pName].emplace_back(qWeight);
     }
   } else {
     throw std::runtime_error("Blob format is not float!");
@@ -122,7 +158,7 @@ void Calibration::quantizeBias(Blob *pBlob, float pThresX, float pThresY,
       float fWeight =
           floor(probs[i] * ((pThresX / pThresY) * shiftScale) + 0.5);
       int16_t qWeight = saturate<int16_t>((int)fWeight);
-      m_QBias[pName][i] = qWeight;
+      m_QBias[pName].emplace_back(qWeight);
     }
   } else {
     throw std::runtime_error("Blob format is not float!");
@@ -154,6 +190,61 @@ bool Calibration::readDataset(TensorCPU *pInputTensor, const string &pDataLayer,
   }
 
   return true;
+}
+
+void Calibration::updateQuantizeWeight(::onnx::Graph *pGraph)
+{
+  // update elemType
+  for (auto input : pGraph->inputs()) {
+    auto elemType = input->elemType();
+    if (elemType == ::onnx::TensorProto_DataType_FLOAT) {
+      auto name = input->uniqueName();
+      if (m_QWeights.count(name)) {
+        input->setElemType(::onnx::TensorProto_DataType_INT8);
+      } else if (m_QBias.count(name)) {
+        input->setElemType(::onnx::TensorProto_DataType_INT16);
+      } else {
+        // input data default is INT8
+        input->setElemType(::onnx::TensorProto_DataType_INT8);
+      }
+    } else {
+      std::cout << "unsupported quantize type:"
+                << TensorProto_DataType_Name(elemType) << std::endl;
+      assert(0);
+    }
+  }
+
+  // update Tensor
+  std::unordered_map<std::string, ::onnx::Tensor> valueTensorMap;
+  const std::vector< ::onnx::Tensor> initTensors = pGraph->initializers();
+  const std::vector<std::string> tensorNames = pGraph->initializer_names();
+  for (size_t i = 0; i < initTensors.size(); ++i) {
+    auto valueName = tensorNames[i];
+    auto oldTensor = initTensors[i];
+    if (1 == m_QWeights.count(valueName)) {
+      ::onnx::Tensor newTensor;
+      copyTensor(newTensor, oldTensor, valueName,
+                 ::onnx::TensorProto_DataType_INT8);
+      assert(m_QWeights[valueName].size() == getTotalCount(oldTensor.sizes()));
+      copyData2Tensor(newTensor, m_QWeights[valueName]);
+      valueTensorMap.emplace(valueName, newTensor);
+      continue;
+    } else if (1 == m_QBias.count(valueName)) {
+      ::onnx::Tensor newTensor;
+      copyTensor(newTensor, oldTensor, valueName,
+                 ::onnx::TensorProto_DataType_INT16);
+      assert(m_QBias[valueName].size() == getTotalCount(oldTensor.sizes()));
+      copyData2Tensor(newTensor, m_QBias[valueName]);
+      valueTensorMap.emplace(valueName, newTensor);
+      continue;
+    }
+    assert(0);
+  }
+
+  pGraph->clearInitializers();
+  for (auto &kv : valueTensorMap) {
+    pGraph->addInitializer(kv.second, kv.first);
+  }
 }
 
 float Calibration::calculateKLD(const string &pBlobName)
@@ -281,9 +372,12 @@ Pass::ReturnType Calibration::runOnModule(Module &pModule)
   // Caliculate right-shift each layer and Quantize weights.
   getRightShiftQuantize(def);
 
-  // TODO: Write Ctable and qWeights into onnx.
   std::cout << m_NetCtableParam.DebugString() << std::endl;
-
+  // write ctable
+  pModule.getMetaData().insert(
+      { "bm1880_ctable", m_NetCtableParam.DebugString() });
+  // write qWeights
+  updateQuantizeWeight(pModule.getGraphIR().get());
   return kModuleChanged;
 }
 } // namespace onnc

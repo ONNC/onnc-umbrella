@@ -49,6 +49,8 @@ private:
   bool readDataset(caffe2::TensorCPU *pInputTensor,
                    const std::string &pDataLayer, int pIteration);
 
+  void updateQuantizeWeight(::onnx::Graph *pGraph);
+
   void Conv(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef);
 
 private:
