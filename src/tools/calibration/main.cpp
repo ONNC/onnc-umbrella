@@ -6,6 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "Calibration.h"
 #include "ONNXOptimizer.h"
 #include "insertDummyCtable.h"
 #include "quantizeWeight.h"
@@ -26,6 +27,15 @@ int main(int pArgc, char *pArgv[])
   if (pArgc != 2) {
     std::cerr << "usage:  " << pArgv[0] << " onnx_file" << std::endl;
     return EXIT_FAILURE;
+  }
+
+  // Run calibration pass.
+  {
+    onnc::Module module;
+    onnc::PassManager pm;
+    // FIXME: Feed optimized onnx model into Calibration pass.
+    pm.add(onnc::createCalibrationPass(pArgv[1]));
+    pm.run(module);
   }
 
   onnc::onnx::Reader reader;
@@ -83,4 +93,6 @@ int main(int pArgc, char *pArgv[])
     pm.add(onnc::createONNCModulePrinterPass());
     pm.run(*module);
   }
+
+  return 0;
 }

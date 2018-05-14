@@ -2,10 +2,13 @@
 include_directories(${ONNC_INCLUDE_DIRS})
 include_directories(${ONNX_INCLUDE_DIRS})
 include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${PYTORCH_INCLUDE_DIRS})
 add_definitions(-DONNX_NAMESPACE=onnx)
 
 add_definitions(-DTOPDIR="${ONNC_SOURCE_DIR}")
 add_definitions(-DBUILDDIR="${ONNC_BINARY_DIR}")
+
+find_library(GLOG_LIB glog)
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/common_calibration.pb.cc
                    COMMAND protoc --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
@@ -16,9 +19,16 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/common_calibration.pb.cc
 
 add_executable(calibration
     ${CMAKE_CURRENT_BINARY_DIR}/common_calibration.pb.cc
+    Calibration.cpp
+    Kld.cpp
     ONNXOptimizer.cpp
     ONNXShapeInference.cpp
     insertDummyCtable.cpp
     main.cpp
     quantizeWeight.cpp)
-target_link_libraries(calibration libonnc ${ONNX_LIBRARIES} ${PROTOBUF_LIBRARIES}) 
+target_link_libraries(calibration
+    libonnc
+    ${ONNX_LIBRARIES}
+    ${PROTOBUF_LIBRARIES}
+    ${PYTORCH_LIBRARIES}
+    ${GLOG_LIB})
