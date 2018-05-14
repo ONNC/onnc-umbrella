@@ -37,23 +37,30 @@ int main(int pArgc, char *pArgv[])
     return EXIT_FAILURE;
   }
 
+  // Run onnx optimizer
+  {
+    onnc::PassManager pm;
+    pm.add(onnc::createONNCModulePrinterPass());
+    pm.add(onnc::createONNXOptimizerPass());
+    pm.run(*module);
+  }
+  std::cout << "after onnx optimizer pass" << std::endl;
+
   // Run calibration pass.
   {
     onnc::PassManager pm;
-    // FIXME: Feed optimized onnx model into Calibration pass.
     pm.add(onnc::createONNCModulePrinterPass());
     pm.add(onnc::createCalibrationPass());
     pm.run(*module);
   }
 
+  std::cout << "after createCalibrationPass" << std::endl;
   {
     onnc::PassManager pm;
-    pm.add(::onnc::createONNCModulePrinterPass());
-    pm.add(::onnc::createInsertDummyCtablePass());
+    pm.add(onnc::createONNCModulePrinterPass());
     pm.run(*module);
   }
 
-  // FIXME add ONNXIRWritter
   // write the new onnx model back to disk
   const char *fileName = "new.onnx";
   {
@@ -63,37 +70,6 @@ int main(int pArgc, char *pArgv[])
     std::fstream output(fileName,
                         std::ios::out | std::ios::trunc | std::ios::binary);
     modelProto.SerializeToOstream(&output);
-  }
-
-  // read and print new onnx model
-  {
-    std::cout << "after InsertDummyCtable" << std::endl;
-    std::unique_ptr<onnc::Module> module2(
-        reader.parse(onnc::Path(fileName), err));
-    if (!err.isGood()) {
-      return EXIT_FAILURE;
-    }
-    ::onnc::PassManager pm;
-    pm.add(::onnc::createONNCModulePrinterPass());
-    pm.run(*module);
-  }
-
-  // test quantizeWeight
-  {
-    std::cout << "after QuantizeWeight" << std::endl;
-    onnc::PassManager pm;
-    pm.add(onnc::createQuantizeWeightPass());
-    pm.add(onnc::createONNCModulePrinterPass());
-    pm.run(*module);
-  }
-
-  // test onnx optimizer
-  {
-    std::cout << "after onnx optimizer pass" << std::endl;
-    onnc::PassManager pm;
-    pm.add(onnc::createONNXOptimizerPass());
-    pm.add(onnc::createONNCModulePrinterPass());
-    pm.run(*module);
   }
 
   return 0;
