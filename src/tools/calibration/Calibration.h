@@ -44,8 +44,9 @@ private:
   void quantizeWeight(caffe2::Blob *pBlob, float pThresX, float pThresY, int pRightShift,
                       caffe2::string pWName);
 
-  bool readDataset(caffe2::TensorCPU *pInputTensor, const std::string &pDataLayer,
-                   int pIteration);
+  bool readDataset(caffe2::TensorCPU *pInputTensor,
+                   const std::vector<int64_t> &pInputDims,
+                   const std::string &pDataLayer, int pIteration);
 
   void updateQuantizeWeight(::onnx::Graph *pGraph);
 

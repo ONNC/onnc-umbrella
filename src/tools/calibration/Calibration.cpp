@@ -57,6 +57,33 @@ void copyData2Tensor(::onnx::Tensor &pTensor, const std::vector<T> &pDataVector)
   }
 }
 
+const std::vector<int64_t>
+getDimension(const std::vector< ::onnx::Dimension> pDims)
+{
+  std::vector<int64_t> int64Dim;
+  for (auto &dim : pDims) {
+    int64Dim.push_back(dim.dim);
+  }
+  return int64Dim;
+}
+
+const std::vector<int64_t> getInputDataDim(const ::onnx::Graph &pConstGraph)
+{
+  // FIXME
+  ::onnx::Graph &graph = const_cast< ::onnx::Graph &>(pConstGraph);
+  std::unordered_set<std::string> initializerNames(
+      graph.initializer_names().begin(), graph.initializer_names().end());
+
+  std::vector<const ::onnx::Value *> inputDatas;
+  for (const ::onnx::Value *v : graph.inputs()) {
+    if (0 == initializerNames.count(v->uniqueName())) {
+      inputDatas.push_back(v);
+    }
+  }
+  assert(1 == inputDatas.size());
+  return getDimension(inputDatas[0]->sizes());
+}
+
 } // anonymous namespace
 
 namespace onnc {
@@ -190,25 +217,19 @@ void Calibration::quantizeWeight(Blob *pBlob, float pThresX, float pThresY,
   }
 }
 
-bool Calibration::readDataset(TensorCPU *pInputTensor, const string &pDataLayer,
-                              int pIteration)
+bool Calibration::readDataset(TensorCPU *pInputTensor,
+                              const std::vector<int64_t> &pInputDims,
+                              const string &pDataLayer, int pIteration)
 {
-  // FIXME: Can read from onnx?
-  constexpr static TIndex batch = 1;
-  constexpr static TIndex channel = 1;
-  constexpr static TIndex height = 28;
-  constexpr static TIndex width = 28;
-  constexpr auto nums = batch * channel * height * width;
-  std::vector<TIndex> inputDims({ batch, channel, height, width });
-
+  auto nums = getTotalCount(pInputDims);
   // FIXME: Should read from lmdb. If fail then return false.
   for (int run = 0; run < pIteration; run++) {
     std::vector<float> data;
-    for (int i = 0; i < nums; i++) {
+    for (size_t i = 0; i < nums; i++) {
       float value = run * -100;
       data.emplace_back(value);
     }
-    TensorCPU tensor(inputDims, data, nullptr);
+    TensorCPU tensor(pInputDims, data, nullptr);
     pInputTensor->ResizeLike(tensor);
     pInputTensor->ShareData(tensor);
     m_BlobData[pDataLayer].emplace_back(tensor);
@@ -431,7 +452,9 @@ Pass::ReturnType Calibration::runOnModule(Module &pModule)
   const string &dataLayer = op.input(0);
   auto inputTensor =
       m_Workspace->CreateBlob(dataLayer)->GetMutable<TensorCPU>();
-  if (!readDataset(inputTensor, dataLayer, iteration)) {
+  auto graph = pModule.getGraphIR();
+  if (!readDataset(inputTensor, getInputDataDim(*graph.get()), dataLayer,
+                   iteration)) {
     errs() << Color::RED << "Error" << Color::RESET << ": Read data set fail..."
            << std::endl;
     return kModuleNoChanged;
