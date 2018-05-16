@@ -16,6 +16,7 @@
 #include <fstream>
 #include <streambuf>
 #include <string>
+#include <type_traits>
 
 #include <caffe2/onnx/backend.h>
 
@@ -52,7 +53,7 @@ void copyData2Tensor(::onnx::Tensor &pTensor, const std::vector<T> &pDataVector)
   auto &tensorData = pTensor.int32s();
   tensorData.reserve(pDataVector.size());
   for (auto &data : pDataVector) {
-    tensorData.push_back(data);
+    tensorData.emplace_back(data);
   }
 }
 
@@ -123,6 +124,40 @@ static bool isBlobUsed(const string &pBlobName, caffe2::NetDef &pDef,
   return false;
 }
 
+static bool isBlobSingleUser(const string &pBlobName, caffe2::NetDef &pDef)
+{
+  int useCount = 0;
+  for (const OperatorDef &op : pDef.op()) {
+    for (const string &in : op.input()) {
+      if (in == pBlobName) {
+        useCount++;
+        if (useCount > 1) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+static int getMultiplier(float pX, float pY, int *pRightShift)
+{
+  float denominatorCeiling = 256.0 / pX * pY;
+  int rightShift = 0;
+  float denominatorQuantized = 1.0;
+
+  while (denominatorQuantized * 2 < denominatorCeiling) {
+    rightShift += 1;
+    denominatorQuantized = float(1 << rightShift);
+  }
+
+  *pRightShift = rightShift;
+  int multiplier = (int)floor(((pX / pY) * denominatorQuantized) + 0.5);
+
+  return multiplier;
+}
+
+template <class T>
 void Calibration::quantizeWeight(Blob *pBlob, float pThresX, float pThresY,
                                  int pRightShift, string pName)
 {
@@ -131,34 +166,24 @@ void Calibration::quantizeWeight(Blob *pBlob, float pThresX, float pThresY,
   if (tensor.IsType<float>()) {
     const auto &probs = tensor.data<float>();
     auto size = tensor.size();
-    m_QWeights[pName].reserve(size);
-
-    for (int i = 0; i < tensor.size(); i++) {
-      float fWeight =
-          floor(probs[i] * ((pThresX / pThresY) * shiftScale) + 0.5);
-      int8_t qWeight = saturate<int8_t>((int)fWeight);
-      m_QWeights[pName].emplace_back(qWeight);
+    if (std::is_same<T, int8_t>::value) {
+      m_QWeights[pName].reserve(size);
+    } else if (std::is_same<T, int16_t>::value) {
+      m_QBias[pName].reserve(size);
+    } else {
+      throw std::runtime_error("Quantized type not support!");
     }
-  } else {
-    throw std::runtime_error("Blob format is not float!");
-  }
-}
-
-void Calibration::quantizeBias(Blob *pBlob, float pThresX, float pThresY,
-                               int pRightShift, string pName)
-{
-  auto tensor = pBlob->Get<TensorCPU>();
-  int shiftScale = 1 << pRightShift;
-  if (tensor.IsType<float>()) {
-    const auto &probs = tensor.data<float>();
-    auto size = tensor.size();
-    m_QBias[pName].reserve(size);
 
     for (int i = 0; i < tensor.size(); i++) {
       float fWeight =
           floor(probs[i] * ((pThresX / pThresY) * shiftScale) + 0.5);
-      int16_t qWeight = saturate<int16_t>((int)fWeight);
-      m_QBias[pName].emplace_back(qWeight);
+      T qWeight = saturate<T>((int)fWeight);
+
+      if (std::is_same<T, int8_t>::value) {
+        m_QWeights[pName].emplace_back(qWeight);
+      } else if (std::is_same<T, int16_t>::value) {
+        m_QBias[pName].emplace_back(qWeight);
+      }
     }
   } else {
     throw std::runtime_error("Blob format is not float!");
@@ -170,9 +195,9 @@ bool Calibration::readDataset(TensorCPU *pInputTensor, const string &pDataLayer,
 {
   // FIXME: Can read from onnx?
   constexpr static TIndex batch = 1;
-  constexpr static TIndex channel = 3;
-  constexpr static TIndex height = 224;
-  constexpr static TIndex width = 224;
+  constexpr static TIndex channel = 1;
+  constexpr static TIndex height = 28;
+  constexpr static TIndex width = 28;
   constexpr auto nums = batch * channel * height * width;
   std::vector<TIndex> inputDims({ batch, channel, height, width });
 
@@ -308,7 +333,7 @@ void Calibration::profileModel(int pIteration, caffe2::NetDef &pDef,
         m_ThresholdY[in] = calculateKLD(in);
       }
     }
-    // FIXME: Needs to check this input is unused anymore...
+
     // Free unused input blobs for saving memory.
     for (const string &in : op.input()) {
       if (m_BlobData.find(in) != m_BlobData.end()) {
@@ -326,11 +351,59 @@ void Calibration::getRightShiftQuantize(caffe2::NetDef &pDef)
 {
   for (const OperatorDef &op : pDef.op()) {
     // FIXME: caffe2 seems no layer name... maybe set "op.type()" + "idx".
-    // layerCalibrationParam.set_name =
+    // layerCalibrationParam.set_name = XXX;
     if (op.type() == "Conv" || op.type() == "FC" || op.type() == "Scale") {
       Conv(op, pDef);
+    } else if (op.type() == "MaxPool" || op.type() == "AveragePool") {
+      Pool(op, pDef);
+    } else if (op.type() == "Relu" || op.type() == "Flatten" ||
+               op.type() == "Concat" || op.type() == "Reshape") {
+      // Do nothing.
+    } else {
+      // FIXME: Add assert in the future.
+      errs() << Color::RED << "Error" << Color::RESET << ": Unsupport op type "
+             << op.type() << std::endl;
     }
     // TODO: Add other layers.
+  }
+}
+
+// Optimizations for Quantization.
+void Calibration::thresholdFold(caffe2::NetDef &pDef)
+{
+  // Forward folding.
+  for (const OperatorDef &op : pDef.op()) {
+    if (op.type() == "Relu" || op.type() == "Flatten") {
+      const string &inputName = op.input(0);
+      const string &outputName = op.output(0);
+      m_ThresholdY[outputName] = m_ThresholdY[inputName];
+    }
+  }
+
+  // Backward folding.
+  int opSize = pDef.op_size();
+  for (int i = (opSize - 1); i >= 0; i--) {
+    const OperatorDef &op = pDef.op(i);
+
+    if (op.type() == "Relu" || op.type() == "Flatten") {
+      const string &inputName = op.input(0);
+      const string &outputName = op.output(0);
+      m_ThresholdY[inputName] = m_ThresholdY[outputName];
+    }
+
+    if (op.type() == "Concat") {
+      const string &outputName = op.output(0);
+      // Check the bottom layer's output is not only for concat.
+      for (const string &in : op.input()) {
+        if (isBlobSingleUser(in, pDef)) {
+          m_ThresholdY[in] = m_ThresholdY[outputName];
+        } else {
+          std::cout << "Blob " << in << " of Concat input has multiple user!"
+                    << std::endl;
+          assert(0);
+        }
+      }
+    }
   }
 }
 
@@ -367,7 +440,7 @@ Pass::ReturnType Calibration::runOnModule(Module &pModule)
   // Run inference and calculate KLD.
   profileModel(iteration, def, dataLayer);
 
-  // TODO: Optimize threshold.
+  thresholdFold(def);
 
   // Caliculate right-shift each layer and Quantize weights.
   getRightShiftQuantize(def);
