@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <onnc/Analysis/UpdateGraphOutputSize.h>
 #include <onnc/Core/PassManager.h>
 #include <onnc/IR/Module.h>
 #include <onnc/IR/ONNCModulePrinter.h>
@@ -43,6 +44,7 @@ int main(int pArgc, char *pArgv[])
   {
     onnc::PassManager pm;
     pm.add(onnc::createONNCModulePrinterPass());
+    pm.add(onnc::CreateUpdateGraphOutputSizePass());
     pm.add(onnc::createONNXOptimizerPass());
     pm.run(*module);
   }
