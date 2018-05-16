@@ -254,9 +254,9 @@ void Calibration::updateQuantizeWeight(::onnx::Graph *pGraph)
         input->setElemType(::onnx::TensorProto_DataType_INT8);
       }
     } else {
-      std::cout << "unsupported quantize type:"
+      // FIXME
+      std::cout << "FIXME: unsupported quantize type:"
                 << TensorProto_DataType_Name(elemType) << std::endl;
-      assert(0);
     }
   }
 
@@ -284,7 +284,9 @@ void Calibration::updateQuantizeWeight(::onnx::Graph *pGraph)
       valueTensorMap.emplace(valueName, newTensor);
       continue;
     }
-    assert(0);
+    // FIXME
+    std::cout << "FIXME: unsupported tensor:" << oldTensor.name() << std::endl;
+    valueTensorMap.insert({ valueName, oldTensor });
   }
 
   pGraph->clearInitializers();
