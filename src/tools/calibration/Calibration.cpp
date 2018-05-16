@@ -18,6 +18,7 @@
 #include <string>
 #include <type_traits>
 
+#include <caffe2/core/db.h>
 #include <caffe2/onnx/backend.h>
 
 using namespace onnc;
@@ -222,17 +223,26 @@ bool Calibration::readDataset(TensorCPU *pInputTensor,
                               const string &pDataLayer, int pIteration)
 {
   auto nums = getTotalCount(pInputDims);
-  // FIXME: Should read from lmdb. If fail then return false.
+  std::unique_ptr<caffe2::db::DBReader> reader(
+      new caffe2::db::DBReader("lmdb", m_DBName));
+  auto *curCursor = reader->cursor();
+  curCursor->SeekToFirst();
   for (int run = 0; run < pIteration; run++) {
+    std::string raw(curCursor->value());
+    std::cout << "raw.length():" << raw.length() << " nums:" << nums
+              << std::endl;
+    // raw data include data and label, input data type is char
+    assert(nums < raw.length());
     std::vector<float> data;
-    for (size_t i = 0; i < nums; i++) {
-      float value = run * -100;
-      data.emplace_back(value);
+    data.reserve(nums);
+    for (size_t i = 0; i < nums; ++i) {
+      data.push_back((float)raw[i]);
     }
     TensorCPU tensor(pInputDims, data, nullptr);
     pInputTensor->ResizeLike(tensor);
     pInputTensor->ShareData(tensor);
     m_BlobData[pDataLayer].emplace_back(tensor);
+    curCursor->Next();
   }
 
   return true;
@@ -452,7 +462,7 @@ Pass::ReturnType Calibration::runOnModule(Module &pModule)
   // Find data layer's name.
   const OperatorDef &op = def.op(0);
   const string &dataLayer = op.input(0);
-  auto inputTensor =
+  caffe2::TensorCPU *inputTensor =
       m_Workspace->CreateBlob(dataLayer)->GetMutable<TensorCPU>();
   auto graph = pModule.getGraphIR();
   if (!readDataset(inputTensor, getInputDataDim(*graph.get()), dataLayer,
@@ -481,4 +491,7 @@ Pass::ReturnType Calibration::runOnModule(Module &pModule)
 } // namespace onnc
 
 char Calibration::ID = 0;
-ModulePass *onnc::createCalibrationPass() { return new Calibration(); }
+ModulePass *onnc::createCalibrationPass(const std::string pDBName)
+{
+  return new Calibration(pDBName);
+}

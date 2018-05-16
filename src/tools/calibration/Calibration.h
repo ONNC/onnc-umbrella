@@ -16,7 +16,7 @@
 #include "common_calibration.pb.h"
 
 namespace onnc {
-ModulePass *createCalibrationPass();
+ModulePass *createCalibrationPass(const std::string pDBName);
 }
 
 namespace onnc {
@@ -28,7 +28,7 @@ class Calibration : public ModulePass
 {
 public:
   static char ID;
-  Calibration() : ModulePass(ID) {}
+  Calibration(const std::string pDBName) : ModulePass(ID), m_DBName(pDBName) {}
 
   Pass::ReturnType runOnModule(Module &pModule) override;
 
@@ -56,6 +56,7 @@ private:
   void Pool(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef);
 
 private:
+  const std::string m_DBName;
   caffe2::Workspace *m_Workspace;
 
   using QWeightData = std::unordered_map<std::string, std::vector<int8_t> >;

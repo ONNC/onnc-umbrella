@@ -24,8 +24,10 @@ using namespace onnc;
 
 int main(int pArgc, char *pArgv[])
 {
-  if (pArgc != 2) {
+  if (pArgc != 3) {
     std::cerr << "usage:  " << pArgv[0] << " onnx_file" << std::endl;
+    std::cerr << "usage:  " << pArgv[1] << " calibration dataset path(.lmdb)"
+              << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -50,7 +52,7 @@ int main(int pArgc, char *pArgv[])
   {
     onnc::PassManager pm;
     pm.add(onnc::createONNCModulePrinterPass());
-    pm.add(onnc::createCalibrationPass());
+    pm.add(onnc::createCalibrationPass(pArgv[2]));
     pm.run(*module);
   }
 
