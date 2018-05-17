@@ -234,7 +234,7 @@ bool Calibration::readDataset(TensorCPU *pInputTensor,
     assert(nums < raw.length());
     const size_t startOffset = raw.length() - nums;
     // FIXME: Only used by mnist.
-    const float dataScale = 1 / 256;
+    const float dataScale = (float)1 / 256;
     std::vector<float> data;
     data.reserve(nums);
     for (size_t i = 0; i < nums; ++i) {

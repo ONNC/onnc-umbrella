@@ -228,7 +228,7 @@ float real_multi_thread_kl_diversity(float *pData, int pCount)
   float width = data_max / (N - 1);
 
   printf("%s %d: data_max=%f width=%f\n", __func__, __LINE__, data_max, width);
-
+  ASSERT(width != 0);
   for (int i = 0; i < pCount; i++) {
     int index = floor(fabs(pData[i]) / width + 0.5);
     hist[index] += 1;
