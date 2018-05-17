@@ -8,8 +8,6 @@
 
 #include "Calibration.h"
 #include "ONNXOptimizer.h"
-#include "insertDummyCtable.h"
-#include "quantizeWeight.h"
 #include <boost/program_options.hpp>
 #include <fstream>
 #include <iostream>
@@ -20,6 +18,7 @@
 #include <onnc/IR/ONNCModulePrinter.h>
 #include <onnc/IR/ONNXUtils.h>
 #include <onnc/IRReader/ONNXReader.h>
+#include <onnc/Transforms/removeUnusedNodes.h>
 #include <onnx/common/ir_pb_converter.h>
 
 using namespace onnc;
@@ -61,6 +60,7 @@ int main(int pArgc, char *pArgv[])
   {
     onnc::PassManager pm;
     pm.add(onnc::createONNCModulePrinterPass());
+    pm.add(onnc::createRemoveUnusedNodesPass());
     pm.add(onnc::CreateUpdateGraphOutputSizePass());
     pm.add(onnc::createONNXOptimizerPass());
     pm.run(*module);
