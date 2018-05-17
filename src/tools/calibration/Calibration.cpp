@@ -50,12 +50,9 @@ void copyTensor(::onnx::Tensor &pDstTensor, const ::onnx::Tensor &pSrcTensor,
 template <class T>
 void copyData2Tensor(::onnx::Tensor &pTensor, const std::vector<T> &pDataVector)
 {
-  // onnx does not support int8 tensor
-  auto &tensorData = pTensor.int32s();
-  tensorData.reserve(pDataVector.size());
-  for (auto &data : pDataVector) {
-    tensorData.emplace_back(data);
-  }
+  size_t size = pDataVector.size() * sizeof(T);
+  std::string rawData(reinterpret_cast<const char *>(pDataVector.data()), size);
+  pTensor.set_raw_data(rawData);
 }
 
 const std::vector<int64_t>
