@@ -273,6 +273,13 @@ void Calibration::updateQuantizeWeight(::onnx::Graph *pGraph)
     }
   }
 
+  // update node's output elementType
+  for (::onnx::Node *node : pGraph->nodes()) {
+    for (::onnx::Value *out : node->outputs()) {
+      out->setElemType(::onnx::TensorProto_DataType_INT8);
+    }
+  }
+
   // update Tensor
   std::unordered_map<std::string, ::onnx::Tensor> valueTensorMap;
   const std::vector< ::onnx::Tensor> initTensors = pGraph->initializers();
