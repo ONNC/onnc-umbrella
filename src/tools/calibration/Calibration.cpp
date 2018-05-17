@@ -223,8 +223,7 @@ bool Calibration::readDataset(TensorCPU *pInputTensor,
                               const string &pDataLayer, int pIteration)
 {
   auto nums = ::onnc::getTotalCount(pInputDims);
-  std::unique_ptr<caffe2::db::DBReader> reader(
-      new caffe2::db::DBReader("lmdb", m_DBName));
+  auto reader = std::make_unique<caffe2::db::DBReader>("lmdb", m_DBName);
   auto *curCursor = reader->cursor();
   curCursor->SeekToFirst();
   for (int run = 0; run < pIteration; run++) {
