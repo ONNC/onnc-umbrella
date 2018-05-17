@@ -232,10 +232,14 @@ bool Calibration::readDataset(TensorCPU *pInputTensor,
               << std::endl;
     // raw data include data and label, input data type is char
     assert(nums < raw.length());
+    const size_t startOffset = raw.length() - nums;
+    // FIXME: Only used by mnist.
+    const float dataScale = 1 / 256;
     std::vector<float> data;
     data.reserve(nums);
     for (size_t i = 0; i < nums; ++i) {
-      data.push_back((float)raw[i]);
+      uint8_t pixel = (uint8_t)raw[i + startOffset];
+      data.push_back((float)pixel * dataScale);
     }
     TensorCPU tensor(pInputDims, data, nullptr);
     pInputTensor->ResizeLike(tensor);
