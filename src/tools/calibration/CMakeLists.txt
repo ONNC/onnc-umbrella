@@ -34,3 +34,4 @@ target_link_libraries(calibration
     ${PROTOBUF_LIBRARIES}
     ${PYTORCH_LIBRARIES}
     ${GLOG_LIB})
+add_test(NAME calibration COMMAND calibration -h)

@@ -10,6 +10,7 @@
 #include "ONNXOptimizer.h"
 #include "insertDummyCtable.h"
 #include "quantizeWeight.h"
+#include <boost/program_options.hpp>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -23,18 +24,34 @@
 
 using namespace onnc;
 
+namespace po = boost::program_options;
+
 int main(int pArgc, char *pArgv[])
 {
-  if (pArgc != 3) {
-    std::cerr << "usage:  " << pArgv[0] << " onnx_file" << std::endl;
-    std::cerr << "usage:  " << pArgv[1] << " calibration dataset path(.lmdb)"
-              << std::endl;
-    return EXIT_FAILURE;
+  onnc::Path onnxPath;
+  std::string datasetPath;
+  {
+    po::options_description desc("Allowed options");
+    // clang-format off
+    desc.add_options()
+        ("help,h", "produce help message")
+        ("onnx,x", po::value(&onnxPath)->required(), "*.onnx file")
+        ("dataset,s", po::value(&datasetPath)->required(), " calibration dataset path(.lmdb)");
+    // clang-format on
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(pArgc, pArgv, desc), vm);
+
+    if (vm.count("help")) {
+      std::cout << desc << "\n";
+      return 0;
+    }
+    po::notify(vm);
   }
 
   onnc::onnx::Reader reader;
   onnc::SystemError err;
-  std::unique_ptr<onnc::Module> module(reader.parse(onnc::Path(pArgv[1]), err));
+  std::unique_ptr<onnc::Module> module(reader.parse(onnxPath, err));
 
   if (!err.isGood()) {
     return EXIT_FAILURE;
@@ -54,7 +71,7 @@ int main(int pArgc, char *pArgv[])
   {
     onnc::PassManager pm;
     pm.add(onnc::createONNCModulePrinterPass());
-    pm.add(onnc::createCalibrationPass(pArgv[2]));
+    pm.add(onnc::createCalibrationPass(datasetPath));
     pm.run(*module);
   }
 
