@@ -222,7 +222,7 @@ bool Calibration::readDataset(TensorCPU *pInputTensor,
                               const std::vector<int64_t> &pInputDims,
                               const string &pDataLayer, int pIteration)
 {
-  auto nums = getTotalCount(pInputDims);
+  auto nums = ::onnc::getTotalCount(pInputDims);
   std::unique_ptr<caffe2::db::DBReader> reader(
       new caffe2::db::DBReader("lmdb", m_DBName));
   auto *curCursor = reader->cursor();
@@ -281,7 +281,8 @@ void Calibration::updateQuantizeWeight(::onnx::Graph *pGraph)
       ::onnx::Tensor newTensor;
       copyTensor(newTensor, oldTensor, valueName,
                  ::onnx::TensorProto_DataType_INT8);
-      assert(m_QWeights[valueName].size() == getTotalCount(oldTensor.sizes()));
+      assert(m_QWeights[valueName].size() ==
+             ::onnc::getTotalCount(oldTensor.sizes()));
       copyData2Tensor(newTensor, m_QWeights[valueName]);
       valueTensorMap.emplace(valueName, newTensor);
       continue;
@@ -289,7 +290,8 @@ void Calibration::updateQuantizeWeight(::onnx::Graph *pGraph)
       ::onnx::Tensor newTensor;
       copyTensor(newTensor, oldTensor, valueName,
                  ::onnx::TensorProto_DataType_INT16);
-      assert(m_QBias[valueName].size() == getTotalCount(oldTensor.sizes()));
+      assert(m_QBias[valueName].size() ==
+             ::onnc::getTotalCount(oldTensor.sizes()));
       copyData2Tensor(newTensor, m_QBias[valueName]);
       valueTensorMap.emplace(valueName, newTensor);
       continue;

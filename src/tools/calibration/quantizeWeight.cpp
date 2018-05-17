@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <onnc/Core/ModulePass.h>
+#include <onnc/IR/ONNXUtils.h>
 #include <onnx/common/ir.h>
 #include <onnx/common/tensor.h>
 
@@ -74,14 +75,6 @@ void copyTensor2Data(std::vector<T> &pDataVector, const ::onnx::Tensor &pTensor)
   }
 }
 
-const ::onnx::Tensor &getTensor(std::string pName, const ::onnx::Graph &pGraph)
-{
-  auto initNames = const_cast< ::onnx::Graph &>(pGraph).initializer_names();
-  std::ptrdiff_t idx = std::distance(
-      initNames.begin(), std::find(initNames.begin(), initNames.end(), pName));
-  return const_cast< ::onnx::Graph &>(pGraph).initializers()[idx];
-}
-
 class quantizeWeight : public ModulePass
 {
 
@@ -115,7 +108,7 @@ void quantizeWeight::genQuantizedWeight(const ::onnx::Graph &pGraph,
       // inputs[1] is weight
       {
         const std::string tensorName = inputs[1]->uniqueName();
-        const ::onnx::Tensor &tensor = getTensor(tensorName, pGraph);
+        const ::onnx::Tensor &tensor = ::onnc::getTensor(tensorName, pGraph);
         std::vector<int8_t> int8DataVector;
         copyTensor2Data(int8DataVector, tensor);
         pQuantizedInt8.emplace(tensorName, int8DataVector);
@@ -124,7 +117,7 @@ void quantizeWeight::genQuantizedWeight(const ::onnx::Graph &pGraph,
       // inputs[2] is bias
       if (3 == inputs.size()) {
         const std::string tensorName = inputs[2]->uniqueName();
-        const ::onnx::Tensor &tensor = getTensor(tensorName, pGraph);
+        const ::onnx::Tensor &tensor = ::onnc::getTensor(tensorName, pGraph);
         std::vector<int16_t> int16DataVector;
         copyTensor2Data(int16DataVector, tensor);
         pQuantizedInt16.emplace(tensorName, int16DataVector);
@@ -137,7 +130,7 @@ void quantizeWeight::genQuantizedWeight(const ::onnx::Graph &pGraph,
       // inputs[1] is weight
       {
         const std::string tensorName = inputs[1]->uniqueName();
-        const ::onnx::Tensor &tensor = getTensor(tensorName, pGraph);
+        const ::onnx::Tensor &tensor = ::onnc::getTensor(tensorName, pGraph);
         std::vector<int8_t> int8DataVector;
         copyTensor2Data(int8DataVector, tensor);
         pQuantizedInt8.emplace(tensorName, int8DataVector);
@@ -146,7 +139,7 @@ void quantizeWeight::genQuantizedWeight(const ::onnx::Graph &pGraph,
       // inputs[2] is bias
       if (3 == inputs.size()) {
         const std::string tensorName = inputs[2]->uniqueName();
-        const ::onnx::Tensor &tensor = getTensor(tensorName, pGraph);
+        const ::onnx::Tensor &tensor = ::onnc::getTensor(tensorName, pGraph);
         std::vector<int16_t> int16DataVector;
         copyTensor2Data(int16DataVector, tensor);
         pQuantizedInt16.emplace(tensorName, int16DataVector);
