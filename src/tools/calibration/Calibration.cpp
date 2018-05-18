@@ -440,7 +440,7 @@ void Calibration::thresholdFold(caffe2::NetDef &pDef)
   }
 }
 
-Pass::ReturnType Calibration::runOnModule(Module &pModule)
+Pass::ReturnType Calibration::runOnModule(::onnc::Module &pModule)
 {
   // TODO: Check If Ctable exist, then skip this pass.
   // FIXME: Sould be specified by user.
@@ -469,7 +469,7 @@ Pass::ReturnType Calibration::runOnModule(Module &pModule)
                    iteration)) {
     errs() << Color::RED << "Error" << Color::RESET << ": Read data set fail..."
            << std::endl;
-    return kModuleNoChanged;
+    return Pass::kModuleNoChanged;
   }
 
   // Run inference and calculate KLD.
@@ -486,7 +486,7 @@ Pass::ReturnType Calibration::runOnModule(Module &pModule)
       { "bm1880_ctable", m_NetCtableParam.DebugString() });
   // write qWeights
   updateQuantizeWeight(pModule.getGraphIR().get());
-  return kModuleChanged;
+  return Pass::kModuleChanged;
 }
 } // namespace onnc
 
