@@ -22,7 +22,7 @@ public:
   static char ID;
   InsertDummyCtable() : ModulePass(ID) {}
 
-  Pass::ReturnType runOnModule(onnc::Module &pModule) override
+  Pass::ReturnType runOnModule(::onnc::Module &pModule) override
   {
     auto graph = pModule.getGraphIR();
     if (graph->has_name()) {
@@ -48,7 +48,9 @@ public:
         assert(0);
       }
     }
-    return kModuleNoChanged;
+    auto ctableString = m_NetCtableParam.DebugString();
+    pModule.getMetaData().insert({ "bm1880_ctable", ctableString });
+    return Pass::kModuleNoChanged;
   }
 
 private:

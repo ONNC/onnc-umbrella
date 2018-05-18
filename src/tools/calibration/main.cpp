@@ -14,6 +14,7 @@
 #include <onnc/Core/PassManager.h>
 #include <onnc/IR/Module.h>
 #include <onnc/IR/ONNCModulePrinter.h>
+#include <onnc/IR/ONNXUtils.h>
 #include <onnc/IRReader/ONNXReader.h>
 #include <onnx/common/ir_pb_converter.h>
 
@@ -44,16 +45,7 @@ int main(int pArgc, char *pArgv[])
   const char *fileName = "new.onnx";
   {
     ::onnx::ModelProto modelProto;
-    // init IR version
-    modelProto.set_ir_version(3);
-    // init graph
-    ::onnx::ExportModelProto(&modelProto, module->getGraphIR());
-    // init metadata
-    for (auto const &data : module->getMetaData()) {
-      auto *metadata_props = modelProto.add_metadata_props();
-      metadata_props->set_key(data.first);
-      metadata_props->set_value(data.second);
-    }
+    ::onnc::ExportModelProto(modelProto, *module);
     // wrtie file
     std::fstream output(fileName,
                         std::ios::out | std::ios::trunc | std::ios::binary);

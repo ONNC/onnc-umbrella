@@ -94,7 +94,7 @@ public:
   static char ID;
   quantizeWeight() : ModulePass(ID) {}
 
-  Pass::ReturnType runOnModule(Module &pModule) override;
+  Pass::ReturnType runOnModule(::onnc::Module &pModule) override;
 
 private:
   void genQuantizedWeight(const ::onnx::Graph &pGraph,
@@ -162,7 +162,7 @@ void quantizeWeight::genQuantizedWeight(const ::onnx::Graph &pGraph,
   }
 }
 
-Pass::ReturnType quantizeWeight::runOnModule(Module &pModule)
+Pass::ReturnType quantizeWeight::runOnModule(::onnc::Module &pModule)
 {
   auto graph = pModule.getGraphIR().get();
 
@@ -225,7 +225,7 @@ Pass::ReturnType quantizeWeight::runOnModule(Module &pModule)
     graph->addInitializer(kv.second, kv.first);
   }
 
-  return kModuleNoChanged;
+  return Pass::kModuleChanged;
 }
 
 char quantizeWeight::ID = 0;
