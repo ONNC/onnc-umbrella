@@ -5,6 +5,7 @@
 // See LICENSE.TXT for details.
 //
 //===----------------------------------------------------------------------===//
+#include <caffe/proto/caffe.pb.h>
 #include <onnc/ADT/Color.h>
 #include <onnc/Core/ModulePass.h>
 #include <onnc/IR/ONNXUtils.h>
@@ -227,16 +228,16 @@ bool Calibration::readDataset(TensorCPU *pInputTensor,
     std::string raw(curCursor->value());
     std::cout << "raw.length():" << raw.length() << " nums:" << nums
               << std::endl;
-    // raw data include data and label, input data type is char
-    assert(nums < raw.length());
-    const size_t startOffset = raw.length() - nums;
-    // FIXME: Only used by mnist.
-    const float dataScale = (float)1 / 256;
+
+    caffe::Datum datum;
+    datum.ParseFromString(raw);
+    std::cout << "datum.data.length():" << datum.data().size()
+              << " nums:" << nums << std::endl;
+    assert(nums == datum.data().size());
     std::vector<float> data;
     data.reserve(nums);
     for (size_t i = 0; i < nums; ++i) {
-      uint8_t pixel = (uint8_t)raw[i + startOffset];
-      data.push_back((float)pixel * dataScale);
+      data.push_back((float)datum.data()[i] / 256);
     }
     TensorCPU tensor(pInputDims, data, nullptr);
     pInputTensor->ResizeLike(tensor);
