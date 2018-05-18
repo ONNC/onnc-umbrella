@@ -30,6 +30,8 @@ public:
   static char ID;
   Calibration(const std::string pDBName) : ModulePass(ID), m_DBName(pDBName) {}
 
+  ~Calibration() override { delete m_Workspace; }
+
   Pass::ReturnType runOnModule(::onnc::Module &pModule) override;
 
 private:

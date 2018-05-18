@@ -498,6 +498,9 @@ Pass::ReturnType Calibration::runOnModule(::onnc::Module &pModule)
       { "bm1880_ctable", m_NetCtableParam.DebugString() });
   // write qWeights
   updateQuantizeWeight(pModule.getGraphIR().get());
+
+  delete backend;
+
   return Pass::kModuleChanged;
 }
 } // namespace onnc
