@@ -28,7 +28,7 @@ public:
     auto optModelProto = onnxOptimizer.optimize(modelProto, passNames);
     ::onnc::IRBuilder ir_b(pModule);
     ir_b.update(optModelProto);
-    return kModuleNoChanged;
+    return Pass::kModuleChanged;
   }
 };
 

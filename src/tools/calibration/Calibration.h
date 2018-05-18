@@ -30,7 +30,7 @@ public:
   static char ID;
   Calibration(const std::string pDBName) : ModulePass(ID), m_DBName(pDBName) {}
 
-  Pass::ReturnType runOnModule(Module &pModule) override;
+  Pass::ReturnType runOnModule(::onnc::Module &pModule) override;
 
 private:
   float calculateKLD(const std::string &pBlobName);

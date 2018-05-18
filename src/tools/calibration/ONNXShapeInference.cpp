@@ -17,7 +17,7 @@ public:
   static char ID;
   ONNXShapeInference() : ModulePass(ID) {}
 
-  Pass::ReturnType runOnModule(Module &pModule) override
+  Pass::ReturnType runOnModule(::onnc::Module &pModule) override
   {
     ::onnx::ModelProto modelProto;
     ::onnc::ExportModelProto(modelProto, pModule);
@@ -26,12 +26,12 @@ public:
     } catch (::onnx::checker::ValidationError &e) {
       std::cerr << e.what() << std::endl
                 << "ONNXShapeInference pass is not workable!!" << std::endl;
-      return kModuleNoChanged;
+      return Pass::kModuleNoChanged;
     }
     ::onnx::shape_inference::InferShapes(modelProto);
     ::onnc::IRBuilder ir_b(pModule);
     ir_b.update(modelProto);
-    return kModuleChanged;
+    return Pass::kModuleChanged;
   }
 };
 
