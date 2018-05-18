@@ -237,7 +237,9 @@ bool Calibration::readDataset(TensorCPU *pInputTensor,
     std::vector<float> data;
     data.reserve(nums);
     for (size_t i = 0; i < nums; ++i) {
-      data.push_back((float)datum.data()[i] / 256);
+      uint8_t pixel = datum.data()[i];
+      // FIXME: The scale "1/256" is only for mnist.
+      data.push_back((float)pixel / 256);
     }
     TensorCPU tensor(pInputDims, data, nullptr);
     pInputTensor->ResizeLike(tensor);
