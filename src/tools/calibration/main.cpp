@@ -53,6 +53,7 @@ int main(int pArgc, char *pArgv[])
   std::unique_ptr<onnc::Module> module(reader.parse(onnxPath, err));
 
   if (!err.isGood()) {
+    std::cerr << "load onnx model \"" << onnxPath << "\" failed!\n";
     return EXIT_FAILURE;
   }
 
