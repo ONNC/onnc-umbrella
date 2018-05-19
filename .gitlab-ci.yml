@@ -1,11 +1,11 @@
-image: iclink/onnc_dev:1.1
+image: iclink/onnc_dev:1.4
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
 
 stages:
+  - code_review
   - build
-  - build_ninja
 
 before_script:
   - git clean -ffdx
@@ -48,3 +48,17 @@ build_ninja:
     - cmake .. -G Ninja
     - ninja
     - ctest -j$(nproc)
+
+newline:
+  stage: code_review
+  script:
+    - if git grep -Il $'\r'; then false; fi
+
+clang_format:
+  stage: code_review
+  script:
+    - mkdir build
+    - pushd build
+    - cmake ..
+    - popd
+    - ./scripts/clang-format.sh
