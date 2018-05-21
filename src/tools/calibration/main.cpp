@@ -30,13 +30,15 @@ int main(int pArgc, char *pArgv[])
   onnc::Path onnxPath;
   std::string datasetPath;
   int iteration;
+  bool fast;
   {
     po::options_description desc("Allowed options");
     // clang-format off
     desc.add_options()
         ("help,h", "produce help message")
         ("onnx,x", po::value(&onnxPath)->required(), "*.onnx file")
-        ("dataset,s", po::value(&datasetPath)->required(), " calibration dataset path(.lmdb)")
+        ("dataset,s", po::value(&datasetPath)->required(), "calibration dataset path(.lmdb)")
+        ("fast,f", po::bool_switch(&fast), "run calibration only")
         ("iteration,i", po::value(&iteration)->default_value(5), "iteration number");
     // clang-format on
 
@@ -60,7 +62,7 @@ int main(int pArgc, char *pArgv[])
   }
 
   // Run onnx optimizer
-  {
+  if (!fast) {
     onnc::PassManager pm;
     pm.add(onnc::createONNCModulePrinterPass());
     pm.add(onnc::createRemoveUnusedNodesPass());
@@ -73,13 +75,14 @@ int main(int pArgc, char *pArgv[])
   // Run calibration pass.
   {
     onnc::PassManager pm;
-    pm.add(onnc::createONNCModulePrinterPass());
+    if (!fast)
+      pm.add(onnc::createONNCModulePrinterPass());
     pm.add(onnc::createCalibrationPass(datasetPath, iteration));
     pm.run(*module);
   }
 
   std::cout << "after createCalibrationPass" << std::endl;
-  {
+  if (!fast) {
     onnc::PassManager pm;
     pm.add(onnc::createONNCModulePrinterPass());
     pm.run(*module);
