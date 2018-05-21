@@ -216,8 +216,7 @@ void Calibration::quantizeWeight(Blob *pBlob, float pThresX, float pThresY,
   }
 }
 
-bool Calibration::readDataset(TensorCPU *pInputTensor,
-                              const std::vector<int64_t> &pInputDims,
+bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
                               const string &pDataLayer, int pIteration)
 {
   auto nums = ::onnc::getTotalCount(pInputDims);
@@ -242,8 +241,6 @@ bool Calibration::readDataset(TensorCPU *pInputTensor,
       data.push_back((float)pixel / 256);
     }
     TensorCPU tensor(pInputDims, data, nullptr);
-    pInputTensor->ResizeLike(tensor);
-    pInputTensor->ShareData(tensor);
     m_BlobData[pDataLayer].emplace_back(tensor);
     curCursor->Next();
   }
@@ -472,11 +469,9 @@ Pass::ReturnType Calibration::runOnModule(::onnc::Module &pModule)
   // Find data layer's name.
   const OperatorDef &op = def.op(0);
   const string &dataLayer = op.input(0);
-  caffe2::TensorCPU *inputTensor =
-      m_Workspace->CreateBlob(dataLayer)->GetMutable<TensorCPU>();
+  m_Workspace->CreateBlob(dataLayer);
   auto graph = pModule.getGraphIR();
-  if (!readDataset(inputTensor, getInputDataDim(*graph.get()), dataLayer,
-                   m_Iteration)) {
+  if (!readDataset(getInputDataDim(*graph.get()), dataLayer, m_Iteration)) {
     errs() << Color::RED << "Error" << Color::RESET << ": Read data set fail..."
            << std::endl;
     return Pass::kModuleNoChanged;
