@@ -224,25 +224,48 @@ bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
   auto *curCursor = reader->cursor();
   curCursor->SeekToFirst();
   for (int run = 0; run < pIteration; run++) {
-    std::string raw(curCursor->value());
-    std::cout << "raw.length():" << raw.length() << " nums:" << nums
-              << std::endl;
-
-    caffe::Datum datum;
-    datum.ParseFromString(raw);
-    std::cout << "datum.data.length():" << datum.data().size()
-              << " nums:" << nums << std::endl;
-    assert(nums == datum.data().size());
+    std::cout << "pInputDims NCHW: " << pInputDims << std::endl;
     std::vector<float> data;
-    data.reserve(nums);
-    for (size_t i = 0; i < nums; ++i) {
-      uint8_t pixel = datum.data()[i];
-      // FIXME: The scale "1/256" is only for mnist.
-      data.push_back((float)pixel / 256);
+    for (int b = 0; b < pInputDims.at(0); b++) {
+      std::string raw(curCursor->value());
+      curCursor->Next();
+
+      caffe::Datum datum;
+      datum.ParseFromString(raw);
+      std::cout << "datum CHW: " << datum.channels() << " " << datum.height()
+                << " " << datum.width() << std::endl;
+      int h = datum.height();
+      int w = datum.width();
+      int h_crop = pInputDims.at(2);
+      int w_crop = pInputDims.at(3);
+      assert(h == w);
+      assert(h_crop == w_crop);
+      assert(datum.channels() == pInputDims.at(1));
+      int h_offset = (h - h_crop) / 2;
+      int w_offset = (w - w_crop) / 2;
+      bool is_vgg16 = false;
+      std::vector<float> mean = { 103.939, 116.779, 123.68 };
+      for (int c = 0; c < datum.channels(); ++c) {
+        for (int ih = h_offset; ih < h_offset + h_crop; ++ih) {
+          for (int iw = w_offset; iw < w_offset + w_crop; ++iw) {
+            int i = c * h * w + ih * w + iw;
+            float pixel = (uint8_t)datum.data()[i];
+            if (is_vgg16)
+              pixel -= mean[c];
+            else
+              pixel /= 256; // FIXME: The scale "1/256" is only for mnist.
+            data.push_back(pixel);
+          }
+        }
+      }
+    }
+    if (nums != data.size()) {
+      std::cout << "error: dimension mismatch, " << nums << " vs "
+                << data.size() << std::endl;
+      exit(1);
     }
     TensorCPU tensor(pInputDims, data, nullptr);
     m_BlobData[pDataLayer].emplace_back(tensor);
-    curCursor->Next();
   }
 
   return true;
