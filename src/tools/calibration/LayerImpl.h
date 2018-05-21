@@ -33,6 +33,7 @@ void Calibration::Conv(const OperatorDef &pOp, caffe2::NetDef &pDef)
   BlobParameter *outBlobParam = layerCalibrationParam->add_blob_param();
   outBlobParam->set_name(outputName);
   outBlobParam->set_threshold_y(thresY);
+  layerCalibrationParam->set_name(outputName);
   layerCalibrationParam->set_right_shift_width(rightShift);
   layerCalibrationParam->add_threshold_y(thresY);
 }
@@ -53,6 +54,7 @@ void Calibration::Pool(const OperatorDef &pOp, caffe2::NetDef &pDef)
   BlobParameter *outBlobParam = layerCalibrationParam->add_blob_param();
   outBlobParam->set_name(outputName);
   outBlobParam->set_threshold_y(thresY);
+  layerCalibrationParam->set_name(outputName);
   layerCalibrationParam->set_right_shift_width(rightShift);
   layerCalibrationParam->add_threshold_y(thresY);
   layerCalibrationParam->add_threshold_x_quantized(multiplier);
