@@ -455,8 +455,6 @@ void Calibration::thresholdFold(caffe2::NetDef &pDef)
 Pass::ReturnType Calibration::runOnModule(::onnc::Module &pModule)
 {
   // TODO: Check If Ctable exist, then skip this pass.
-  // FIXME: Sould be specified by user.
-  constexpr int iteration = 5;
 
   std::string onnxStr;
   ::onnc::SerializeToString(onnxStr, pModule);
@@ -478,14 +476,14 @@ Pass::ReturnType Calibration::runOnModule(::onnc::Module &pModule)
       m_Workspace->CreateBlob(dataLayer)->GetMutable<TensorCPU>();
   auto graph = pModule.getGraphIR();
   if (!readDataset(inputTensor, getInputDataDim(*graph.get()), dataLayer,
-                   iteration)) {
+                   m_Iteration)) {
     errs() << Color::RED << "Error" << Color::RESET << ": Read data set fail..."
            << std::endl;
     return Pass::kModuleNoChanged;
   }
 
   // Run inference and calculate KLD.
-  profileModel(iteration, def, dataLayer);
+  profileModel(m_Iteration, def, dataLayer);
 
   thresholdFold(def);
 
@@ -506,7 +504,7 @@ Pass::ReturnType Calibration::runOnModule(::onnc::Module &pModule)
 } // namespace onnc
 
 char Calibration::ID = 0;
-ModulePass *onnc::createCalibrationPass(const std::string pDBName)
+ModulePass *onnc::createCalibrationPass(const std::string pDBName, int pI)
 {
-  return new Calibration(pDBName);
+  return new Calibration(pDBName, pI);
 }

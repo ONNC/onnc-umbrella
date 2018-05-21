@@ -16,7 +16,7 @@
 #include "common_calibration.pb.h"
 
 namespace onnc {
-ModulePass *createCalibrationPass(const std::string pDBName);
+ModulePass *createCalibrationPass(const std::string pDBName, int pI);
 }
 
 namespace onnc {
@@ -28,7 +28,10 @@ class Calibration : public ModulePass
 {
 public:
   static char ID;
-  Calibration(const std::string pDBName) : ModulePass(ID), m_DBName(pDBName) {}
+  Calibration(const std::string pDBName, int pI)
+      : ModulePass(ID), m_DBName(pDBName), m_Iteration(pI)
+  {
+  }
 
   ~Calibration() override { delete m_Workspace; }
 
@@ -74,6 +77,7 @@ private:
   std::unordered_map<std::string, float> m_ThresholdY;
 
   NetCalibrationParameter m_NetCtableParam;
+  int m_Iteration;
 };
 } // namespace onnc
 #endif // CALIBRATION_H

@@ -29,13 +29,15 @@ int main(int pArgc, char *pArgv[])
 {
   onnc::Path onnxPath;
   std::string datasetPath;
+  int iteration;
   {
     po::options_description desc("Allowed options");
     // clang-format off
     desc.add_options()
         ("help,h", "produce help message")
         ("onnx,x", po::value(&onnxPath)->required(), "*.onnx file")
-        ("dataset,s", po::value(&datasetPath)->required(), " calibration dataset path(.lmdb)");
+        ("dataset,s", po::value(&datasetPath)->required(), " calibration dataset path(.lmdb)")
+        ("iteration,i", po::value(&iteration)->default_value(5), "iteration number");
     // clang-format on
 
     po::variables_map vm;
@@ -72,7 +74,7 @@ int main(int pArgc, char *pArgv[])
   {
     onnc::PassManager pm;
     pm.add(onnc::createONNCModulePrinterPass());
-    pm.add(onnc::createCalibrationPass(datasetPath));
+    pm.add(onnc::createCalibrationPass(datasetPath, iteration));
     pm.run(*module);
   }
 
