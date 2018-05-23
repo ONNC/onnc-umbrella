@@ -343,7 +343,6 @@ void Calibration::profileModel(int pIteration, caffe2::NetDef &pDef,
   LayerCalibrationParameter *layerCalibrationParam =
       m_NetCtableParam.add_layer();
   layerCalibrationParam->set_name(pDataLayer);
-  layerCalibrationParam->add_threshold_y(m_ThresholdY[pDataLayer]);
   BlobParameter *outBlobParam = layerCalibrationParam->add_blob_param();
   outBlobParam->set_name(pDataLayer);
   outBlobParam->set_threshold_y(m_ThresholdY[pDataLayer]);
@@ -405,7 +404,6 @@ void Calibration::getRightShiftQuantize(caffe2::NetDef &pDef)
         m_NetCtableParam.add_layer();
     layerCalibrationParam->set_name(op.output(0));
     for (const string &out : op.output()) {
-      layerCalibrationParam->add_threshold_y(m_ThresholdY[out]);
       BlobParameter *outBlobParam = layerCalibrationParam->add_blob_param();
       outBlobParam->set_name(out);
       outBlobParam->set_threshold_y(m_ThresholdY[out]);

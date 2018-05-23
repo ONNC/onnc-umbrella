@@ -24,7 +24,6 @@ message PReLUCalibrationParameter {
 message LayerCalibrationParameter {
   required string name = 1; // the layer name
 
-  repeated float threshold_y = 2; // output threshold values of current layer
   optional int32 right_shift_width = 3;
   repeated int32 threshold_x_quantized = 4; // reference calibration_caffe
   repeated BlobParameter blob_param = 5;
