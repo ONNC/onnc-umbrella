@@ -339,6 +339,15 @@ void Calibration::profileModel(int pIteration, caffe2::NetDef &pDef,
   // Calculate "data layer" KLD.
   m_ThresholdY[pDataLayer] = calculateKLD(pDataLayer);
 
+  // Add "data layer" threshold into Ctable.
+  LayerCalibrationParameter *layerCalibrationParam =
+      m_NetCtableParam.add_layer();
+  layerCalibrationParam->set_name(pDataLayer);
+  layerCalibrationParam->add_threshold_y(m_ThresholdY[pDataLayer]);
+  BlobParameter *outBlobParam = layerCalibrationParam->add_blob_param();
+  outBlobParam->set_name(pDataLayer);
+  outBlobParam->set_threshold_y(m_ThresholdY[pDataLayer]);
+
   int opIdx = 0;
   for (const OperatorDef &op : pDef.op()) {
     for (int run = 0; run < pIteration; run++) {
@@ -392,12 +401,20 @@ void Calibration::profileModel(int pIteration, caffe2::NetDef &pDef,
 void Calibration::getRightShiftQuantize(caffe2::NetDef &pDef)
 {
   for (const OperatorDef &op : pDef.op()) {
-    // FIXME: caffe2 seems no layer name... maybe set "op.type()" + "idx".
-    // layerCalibrationParam.set_name = XXX;
+    LayerCalibrationParameter *layerCalibrationParam =
+        m_NetCtableParam.add_layer();
+    layerCalibrationParam->set_name(op.output(0));
+    for (const string &out : op.output()) {
+      layerCalibrationParam->add_threshold_y(m_ThresholdY[out]);
+      BlobParameter *outBlobParam = layerCalibrationParam->add_blob_param();
+      outBlobParam->set_name(out);
+      outBlobParam->set_threshold_y(m_ThresholdY[out]);
+    }
+
     if (op.type() == "Conv" || op.type() == "FC" || op.type() == "Scale") {
-      Conv(op, pDef);
+      Conv(op, pDef, layerCalibrationParam);
     } else if (op.type() == "MaxPool" || op.type() == "AveragePool") {
-      Pool(op, pDef);
+      Pool(op, pDef, layerCalibrationParam);
     } else if (op.type() == "Relu" || op.type() == "Flatten" ||
                op.type() == "Concat" || op.type() == "Reshape") {
       // Do nothing.

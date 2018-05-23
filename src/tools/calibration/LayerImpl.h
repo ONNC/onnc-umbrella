@@ -5,11 +5,9 @@
 // See LICENSE.TXT for details.
 //
 //===----------------------------------------------------------------------===//
-void Calibration::Conv(const OperatorDef &pOp, caffe2::NetDef &pDef)
+void Calibration::Conv(const OperatorDef &pOp, caffe2::NetDef &pDef,
+                       LayerCalibrationParameter *pLayerCalibrationParam)
 {
-  LayerCalibrationParameter *layerCalibrationParam =
-      m_NetCtableParam.add_layer();
-
   const string &inputName = pOp.input(0);
   const string &weightName = pOp.input(1);
   const string &outputName = pOp.output(0);
@@ -30,19 +28,12 @@ void Calibration::Conv(const OperatorDef &pOp, caffe2::NetDef &pDef)
   }
 
   // Setup Ctable parameters.
-  BlobParameter *outBlobParam = layerCalibrationParam->add_blob_param();
-  outBlobParam->set_name(outputName);
-  outBlobParam->set_threshold_y(thresY);
-  layerCalibrationParam->set_name(outputName);
-  layerCalibrationParam->set_right_shift_width(rightShift);
-  layerCalibrationParam->add_threshold_y(thresY);
+  pLayerCalibrationParam->set_right_shift_width(rightShift);
 }
 
-void Calibration::Pool(const OperatorDef &pOp, caffe2::NetDef &pDef)
+void Calibration::Pool(const OperatorDef &pOp, caffe2::NetDef &pDef,
+                       LayerCalibrationParameter *pLayerCalibrationParam)
 {
-  LayerCalibrationParameter *layerCalibrationParam =
-      m_NetCtableParam.add_layer();
-
   const string &inputName = pOp.input(0);
   const string &outputName = pOp.output(0);
 
@@ -51,11 +42,6 @@ void Calibration::Pool(const OperatorDef &pOp, caffe2::NetDef &pDef)
   int rightShift;
   int multiplier = getMultiplier(thresX, thresY, &rightShift);
 
-  BlobParameter *outBlobParam = layerCalibrationParam->add_blob_param();
-  outBlobParam->set_name(outputName);
-  outBlobParam->set_threshold_y(thresY);
-  layerCalibrationParam->set_name(outputName);
-  layerCalibrationParam->set_right_shift_width(rightShift);
-  layerCalibrationParam->add_threshold_y(thresY);
-  layerCalibrationParam->add_threshold_x_quantized(multiplier);
+  pLayerCalibrationParam->set_right_shift_width(rightShift);
+  pLayerCalibrationParam->add_threshold_x_quantized(multiplier);
 }

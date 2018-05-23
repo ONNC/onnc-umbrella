@@ -56,8 +56,10 @@ private:
 
   void thresholdFold(caffe2::NetDef &pDef);
 
-  void Conv(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef);
-  void Pool(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef);
+  void Conv(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef,
+            LayerCalibrationParameter *pLayerCalibrationParam);
+  void Pool(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef,
+            LayerCalibrationParameter *pLayerCalibrationParam);
 
 private:
   const std::string m_DBName;
