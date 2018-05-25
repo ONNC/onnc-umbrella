@@ -54,6 +54,11 @@ newline:
   script:
     - if git grep -Il $'\r'; then false; fi
 
+namespace:
+  stage: code_review
+  script:
+    - if git grep "^using.*namespace" --  '*.h'; then false; fi
+
 clang_format:
   stage: code_review
   script:
