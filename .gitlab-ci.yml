@@ -9,7 +9,7 @@ stages:
 
 before_script:
   - git clean -ffdx
-  - git submodule foreach git clean -ffdx
+  - git submodule foreach --recursive git clean -ffdx
 
 build:
   stage: build
@@ -36,6 +36,7 @@ build_separate:
           -DBMTAP_INSTALL_DIR=$PWD/../build_external/Install/bmtap2
           -DBMTAP_SOURCE_DIR=$PWD/../external/bmtap2
           -DBMTAP_BINARY_DIR=$PWD/../build_external/Build/bmtap2
+          -DPYTORCH_INSTALL_DIR=$PWD/../build_external/Install/pytorch
     -   make -j$(nproc)
     -   ctest -j$(nproc)
     - popd

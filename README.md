@@ -12,6 +12,7 @@ ONNC Umbrella is the umbrella for all ONNC projects.
   5. Protocol Buffer
 
 ### Ubuntu - with Apt ###
+
 ```
 apt install git automake libtool protobuf-compiler libprotoc-dev python2.7 python2.7-dev
 ```
@@ -30,16 +31,17 @@ Dance with `build.sh` script.
 
 1. Check out ONNC from the repository.
 
-```
-git clone --recursive ssh://git@git-bitmain.skymizer.com:6824/bmsky/onnc.git ${ONNC}
-```
+    ```
+    git clone --recursive ssh://git@git-bitmain.skymizer.com:6824/bmsky/onnc.git ${ONNC}
+    ```
 
 2. Type `cd ${ONNC}' to the directory containing the source code.
 
 3. Use `build.sh` to compile the package.
-```
-./build.sh [mode] [target folder]
-```
+
+    ```
+    ./build.sh [mode] [target folder]
+    ```
 
 The package is built at `./build-<mode>/`, and installed
 to `./install-<mode>/`. It is a staged installation if the
@@ -58,6 +60,7 @@ tar zxf onnc-master.tar.gz -C /opt
 ```
 
 or
+
 ```
 mkdir /opt/onnc
 tar zxf onnc-master.tar.gz --strip-components 1 -C /opt/onnc
@@ -71,8 +74,8 @@ to the staged installation path instead of being installed directly to the
 target folder `/opt/onnc`.
 
 ```
-        cd ./build-dbg
-        make DESTDIR=$(pwd)/../install-dbg install
+cd ./build-dbg
+make DESTDIR=$(pwd)/../install-dbg install
 ```
 
 ### Building Mode
@@ -98,3 +101,39 @@ The package is configured to be installed at the target folder (PREFIX).
 * build.sh  - The building script
 * src       - The source directory of onnc project
 * external  - The external librarys
+
+## Compilation Instructions (CMake)
+
+### Enviroment setup
+
+see **Workflow 2 with CMake** in docker/README.md
+
+### Build
+
+```
+mkdir -p build
+pushd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/install
+    make -j4
+    make install
+popd
+```
+
+### Coding style
+
+  * clang-format
+    1. install Vundle in vim
+    2. add vim-autoformat in vimrc
+
+        ```
+        Plugin 'Chiel92/vim-autoformat'
+        map <silent>  <F3> :Autoformat<CR>
+        let g:formatters_cpp = ['clangformat', 'fail']
+        ```
+
+  * clang-tidy
+
+    ```
+    cd onnc
+    run-clang-tidy-5.0.py src -p build
+    ``` 

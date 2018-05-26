@@ -20,4 +20,7 @@ if (TARGET_TG)
     set(BMTAP_BINARY_DIR ${BINARY_DIR} CACHE PATH "bmtap2 binary path")
 endif()
 
+ExternalProject_Get_Property(pytorch INSTALL_DIR)
+set(PYTORCH_INSTALL_DIR ${INSTALL_DIR} CACHE PATH "pytorch/caffe2 install path")
+
 add_subdirectory(src)
