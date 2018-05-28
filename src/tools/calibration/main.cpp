@@ -29,6 +29,7 @@ int main(int pArgc, char *pArgv[])
 {
   onnc::Path onnxPath;
   std::string datasetPath;
+  std::string fileName;
   int iteration;
   bool fast;
   {
@@ -37,6 +38,7 @@ int main(int pArgc, char *pArgv[])
     desc.add_options()
         ("help,h", "produce help message")
         ("onnx,x", po::value(&onnxPath)->required(), "*.onnx file")
+        ("output,o", po::value(&fileName)->default_value("new.onnx"), "output *.onnx file")
         ("dataset,s", po::value(&datasetPath)->required(), "calibration dataset path(.lmdb)")
         ("fast,f", po::bool_switch(&fast), "run calibration only")
         ("iteration,i", po::value(&iteration)->default_value(5), "iteration number");
@@ -89,7 +91,6 @@ int main(int pArgc, char *pArgv[])
   }
 
   // write the new onnx model back to disk
-  const char *fileName = "new.onnx";
   {
     ::onnx::ModelProto modelProto;
     ::onnc::ExportModelProto(modelProto, *module);
