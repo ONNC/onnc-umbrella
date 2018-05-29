@@ -16,6 +16,7 @@
 #include <onnc/Core/PassManager.h>
 #include <onnc/IR/Module.h>
 #include <onnc/IR/ONNCModulePrinter.h>
+#include <onnc/IR/ONNCNodeNameGen.h>
 #include <onnc/IR/ONNXUtils.h>
 #include <onnc/IRReader/ONNXReader.h>
 #include <onnc/Transforms/removeUnusedNodes.h>
@@ -79,6 +80,7 @@ int main(int pArgc, char *pArgv[])
     onnc::PassManager pm;
     if (!fast)
       pm.add(onnc::createONNCModulePrinterPass());
+    pm.add(onnc::createONNCNodeNameGenPass());
     pm.add(onnc::createCalibrationPass(datasetPath, iteration));
     pm.run(*module);
   }
