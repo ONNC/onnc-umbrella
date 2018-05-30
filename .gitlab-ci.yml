@@ -62,6 +62,7 @@ namespace:
 
 clang_format:
   stage: code_review
+  allow_failure: true
   script:
     - mkdir build
     - pushd build
