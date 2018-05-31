@@ -39,6 +39,9 @@ RUN apt-get update \
         python-pip \
         python-dev \
         python-setuptools \
+# for JSON
+        bison \
+        flex \
 # for build
         ninja-build \
         cmake-curses-gui \
