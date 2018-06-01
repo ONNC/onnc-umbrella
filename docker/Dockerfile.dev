@@ -32,6 +32,7 @@ RUN apt-get update \
         cmake \
         g++ \
         python \
+        llvm-5.0-tools \
 # for onnx
         git \
         protobuf-compiler \
@@ -45,7 +46,15 @@ RUN apt-get update \
 # for build
         ninja-build \
         cmake-curses-gui \
+# for code-review
+        clang-5.0 \
+        clang-tidy-5.0 \
+        clang-format-5.0 \
     && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="${PATH}:/usr/lib/llvm-5.0/bin"
+ENV PATH="${PATH}:/usr/lib/llvm-5.0/share/clang"
+RUN ln -s /usr/bin/clang-format-diff-5.0  /usr/bin/clang-format-diff.py
 
 RUN pip install protobuf
 
@@ -55,11 +64,3 @@ RUN pip install \
       numpy \
       protobuf
 
-# for code-review
-RUN apt-get update && apt-get install -y \
-        clang-5.0 \
-        clang-tidy-5.0 \
-        clang-format-5.0
-ENV PATH="${PATH}:/usr/lib/llvm-5.0/bin"
-ENV PATH="${PATH}:/usr/lib/llvm-5.0/share/clang"
-RUN ln -s /usr/bin/clang-format-diff-5.0  /usr/bin/clang-format-diff.py
