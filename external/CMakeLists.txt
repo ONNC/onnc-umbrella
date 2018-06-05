@@ -50,6 +50,7 @@ ExternalProject_Add(onnx
 add_dependencies(build_external onnx)
 
 option_enum(NAME CMAKE_BUILD_TYPE_TG VALUE Debug Release CHECK TARGET_TG)
+option_enum(NAME TARGET_TG_ARCH VALUE BM1880 BM1680 BM1682 CHECK TARGET_TG)
 if (TARGET_TG)
     ExternalProject_Add(bmtap2
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bmtap2
@@ -58,7 +59,7 @@ if (TARGET_TG)
         CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE_TG}
         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-        -DCHIP=BM1680
+        -DCHIP=${TARGET_TG_ARCH}
         -Dbuild_bmnet=ON)
     add_dependencies(build_external bmtap2)
 endif()
