@@ -5,6 +5,13 @@
 namespace onnc {
 namespace onnx {
 
+void SerializeToString(std::string &output, const Module &pModule)
+{
+  ::onnx::ModelProto modelProto;
+  ExportModelProto(modelProto, pModule);
+  modelProto.SerializeToString(&output);
+}
+
 void ExportModelProto(::onnx::ModelProto &pModelProto, const Module &pModule)
 {
   pModelProto.set_ir_version(pModule.m_OnnxIRVersion);
@@ -58,6 +65,22 @@ void ImportModelProto(Module &pModule, const ::onnx::ModelProto &pModelProto)
     auto &strStrEntry = pModelProto.metadata_props(i);
     pModule.getMetaData().insert({ strStrEntry.key(), strStrEntry.value() });
   }
+}
+
+size_t getTotalCount(const std::vector<int64_t> &pDim)
+{
+  size_t s = 1;
+  for (auto &size : pDim)
+    s *= size;
+  return s;
+}
+
+const ::onnx::Tensor &getTensor(std::string name, const ::onnx::Graph &graph)
+{
+  auto initNames = const_cast< ::onnx::Graph &>(graph).initializer_names();
+  std::ptrdiff_t idx = std::distance(
+      initNames.begin(), std::find(initNames.begin(), initNames.end(), name));
+  return const_cast< ::onnx::Graph &>(graph).initializers()[idx];
 }
 
 } // namespace onnx

@@ -1,22 +1,22 @@
 #include <onnc/Core/ModulePass.h>
-#include <onnc/Core/PassSupport.h>
-#include "onnx/common/ir.h"
-#include "TG.h"
-#include "ONNXIRPrinter.h"
+#include <onnc/Transforms/removeUnusedNodes.h>
+#include <onnx/common/ir.h>
 
 using namespace onnc;
 
 namespace {
 
-class RemoveUnusedNode : public ModulePass {
+class RemoveUnusedNodes : public ModulePass
+{
 
 public:
   static char ID;
 
 public:
-  RemoveUnusedNode() : ModulePass(ID) {}
+  RemoveUnusedNodes() : ModulePass(ID) {}
 
-  Pass::ReturnType runOnModule(::onnc::Module &pModule) override {
+  Pass::ReturnType runOnModule(::onnc::Module &pModule) override
+  {
     ::onnx::Graph *graph = pModule.getGraph().get();
     Pass::ReturnType isChanged = Pass::kModuleNoChanged;
     for (auto it = graph->begin(), ie = graph->end(); it != ie; ++it) {
@@ -29,17 +29,15 @@ public:
         isChanged = Pass::kModuleChanged;
       }
     }
-
-    // TODO use IR printer pass, or add passes by option (ex. printf-after-all)
-    std::cout << "==================after RemoveUnusedNodePass: =====================" << std::endl;
-    ONNXIRPrinter::dumpGraph(pModule.getGraph());
-
     return isChanged;
   }
 };
 
 } // anonymous namespace
 
-char RemoveUnusedNode::ID = 0;
+char RemoveUnusedNodes::ID = 0;
 
-ModulePass *onnc::createRemoveUnusedNodePass() { return new RemoveUnusedNode(); }
+ModulePass *onnc::createRemoveUnusedNodesPass()
+{
+  return new RemoveUnusedNodes();
+}
