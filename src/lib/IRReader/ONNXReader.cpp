@@ -50,7 +50,7 @@ bool onnc::onnx::Reader::parse(const Path& pFileName, Module& pModule)
       error(onnx_cannot_parsed) << pFileName;
       return false;
     }
-    pModule.delegateGraph(::onnx::ImportModelProto(model));
+    ImportModelProto(pModule, model);
   }
 
   err = file.close();
