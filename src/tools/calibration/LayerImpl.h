@@ -63,15 +63,15 @@ void Calibration::Eltwise(
     thresX[i] = m_ThresholdY[pOp.input(i)];
 
   // calculate right shift
-  if (pOp.type() == "SUM" || pOp.type() == "MAX") {
+  if (pOp.type() == "Sum" || pOp.type() == "Max") {
     for (int i = 0; i < input_num; ++i)
       rightShift[i] =
           calRightShift(std::array<float, 1>{ { thresX[i] / thresY } }, 1.0);
   } else if (pOp.type() == "Mul") {
+    float thres_x_cal = 128.0;
     for (int i = 0; i < input_num; ++i)
-      thres_x_quantized[0] = thres_x_quantized[0] * thresX[i] / 128.0;
-    rightShift[0] = calRightShift(
-        std::array<float, 1>{ { (float)thres_x_quantized[0] } }, 1.0);
+      thres_x_cal *= thresX[i] / 128.0;
+    rightShift[0] = calRightShift(std::array<float, 1>{ { thres_x_cal } }, 1.0);
   }
 
   // use min rightShift as final rightShift
@@ -82,13 +82,18 @@ void Calibration::Eltwise(
   pLayerCalibrationParam->set_right_shift_width(rightShift[0]);
 
   // calculate thres_x_quantized
-  if (pOp.type() == "SUM" || pOp.type() == "MAX") {
+  if (pOp.type() == "Sum" || pOp.type() == "Max") {
     for (int i = 0; i < input_num; ++i) {
-      thres_x_quantized[i] = (thresX[i] / thresY) * (1 << rightShift[0]);
-      pLayerCalibrationParam->add_threshold_x_quantized(thresX[i]);
+      thres_x_quantized[i] = (int)((thresX[i] / thresY) * (1 << rightShift[0]));
+      pLayerCalibrationParam->add_threshold_x_quantized(thres_x_quantized[i]);
     }
   } else if (pOp.type() == "Mul") {
-    thres_x_quantized[0] *= (1 << rightShift[0]);
+    // one 128.0 is used for quantized y in the equation
+    // so we init thres_x_cal as 128.0 to eliminate one 128.0 in denominator
+    float thres_x_cal = 128.0;
+    for (int i = 0; i < input_num; ++i)
+      thres_x_cal *= thresX[i] / 128.0;
+    thres_x_quantized[0] = (int)(thres_x_cal * (1 << rightShift[0]));
     pLayerCalibrationParam->add_threshold_x_quantized(thres_x_quantized[0]);
   }
 
