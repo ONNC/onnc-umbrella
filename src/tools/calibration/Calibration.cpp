@@ -14,6 +14,7 @@
 #include "Calibration.h"
 #include "Kld.h"
 
+#include <cmath>
 #include <fstream>
 #include <streambuf>
 #include <string>
@@ -118,6 +119,30 @@ static int getRightShift(Blob *pBlob, float pScale)
     throw std::runtime_error("Blob format is not float!");
   }
   return m;
+}
+
+template <std::size_t SIZE>
+static int calRightShift(const std::array<float, SIZE> &pData, float pScale)
+{
+  float max{ 0.0 };
+  for (auto &d : pData) {
+    float v = fabs(d);
+    if (v > max)
+      max = v;
+  }
+  max *= pScale;
+
+  if (max <= 0)
+    throw std::runtime_error("Error: calRightShift: max <= 0");
+  if (max >= 128)
+    throw std::runtime_error("Error: calRightShift: max > 128");
+
+  int s = 0;
+  while (max < 64) {
+    s += 1;
+    max *= 2;
+  }
+  return s;
 }
 
 template <class T> static inline T saturate(int pValue)
@@ -438,6 +463,8 @@ void Calibration::getRightShiftQuantize(caffe2::NetDef &pDef)
       Conv(op, pDef, layerCalibrationParam);
     } else if (op.type() == "MaxPool" || op.type() == "AveragePool") {
       Pool(op, pDef, layerCalibrationParam);
+    } else if (op.type() == "Sum" || op.type() == "Max" || op.type() == "Mul") {
+      Eltwise(op, pDef, layerCalibrationParam);
     } else if (op.type() == "Relu" || op.type() == "Flatten" ||
                op.type() == "Concat" || op.type() == "Reshape") {
       // Do nothing.

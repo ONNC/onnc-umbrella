@@ -60,6 +60,8 @@ private:
             tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam);
   void Pool(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef,
             tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam);
+  void Eltwise(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef,
+               tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam);
 
 private:
   const std::string m_DBName;
