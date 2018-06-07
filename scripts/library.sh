@@ -291,6 +291,7 @@ function build_onnx
     cmake \
     "-DCMAKE_BUILD_TYPE=Release" \
     "-DCMAKE_INSTALL_PREFIX=${INSTALLDIR}" \
+    "-DONNX_NAMESPACE=onnx" \
     "${SRCDIR}"
 
   local MAX_MAKE_JOBS=${MAX_MAKE_JOBS-2}
