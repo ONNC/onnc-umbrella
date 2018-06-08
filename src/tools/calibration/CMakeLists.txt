@@ -4,7 +4,6 @@ include_directories(SYSTEM ${ONNX_INCLUDE_DIRS})
 include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
 include_directories(SYSTEM ${PYTORCH_INCLUDE_DIRS})
 include_directories(SYSTEM ${ONNC_BINARY_DIR}/lib/Target/TG/BM188x)
-add_definitions(-DONNX_NAMESPACE=onnx)
 
 add_definitions(-DTOPDIR="${ONNC_SOURCE_DIR}")
 add_definitions(-DBUILDDIR="${ONNC_BINARY_DIR}")
