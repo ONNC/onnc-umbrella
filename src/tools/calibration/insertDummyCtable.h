@@ -8,8 +8,8 @@
 #ifndef INSERT_DUMMY_CTABLE_H
 #define INSERT_DUMMY_CTABLE_H
 
-#include "bm188x_common_calibration.pb.h"
 #include <onnc/Core/ModulePass.h>
+#include <onnc/Target/TG/BM188x/common_calibration2.pb.h>
 #include <onnx/common/ir.h>
 
 namespace onnc {

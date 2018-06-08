@@ -13,7 +13,7 @@
 #include <caffe2/core/init.h>
 #include <caffe2/core/net.h>
 
-#include "bm188x_common_calibration.pb.h"
+#include <onnc/Target/TG/BM188x/common_calibration2.pb.h>
 
 namespace onnc {
 ModulePass *createCalibrationPass(const std::string pDBName, int pI);
