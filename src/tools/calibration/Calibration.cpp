@@ -363,10 +363,11 @@ void Calibration::profileModel(int pIteration, caffe2::NetDef &pDef,
   m_ThresholdY[pDataLayer] = calculateKLD(pDataLayer);
 
   // Add "data layer" threshold into Ctable.
-  LayerCalibrationParameter *layerCalibrationParam =
+  tg::bm1880::LayerCalibrationParameter *layerCalibrationParam =
       m_NetCtableParam.add_layer();
   layerCalibrationParam->set_name(pDataLayer);
-  BlobParameter *outBlobParam = layerCalibrationParam->add_blob_param();
+  tg::bm1880::BlobParameter *outBlobParam =
+      layerCalibrationParam->add_blob_param();
   outBlobParam->set_name(pDataLayer);
   outBlobParam->set_threshold_y(m_ThresholdY[pDataLayer]);
 
@@ -423,11 +424,12 @@ void Calibration::profileModel(int pIteration, caffe2::NetDef &pDef,
 void Calibration::getRightShiftQuantize(caffe2::NetDef &pDef)
 {
   for (const OperatorDef &op : pDef.op()) {
-    LayerCalibrationParameter *layerCalibrationParam =
+    tg::bm1880::LayerCalibrationParameter *layerCalibrationParam =
         m_NetCtableParam.add_layer();
     layerCalibrationParam->set_name(op.output(0));
     for (const string &out : op.output()) {
-      BlobParameter *outBlobParam = layerCalibrationParam->add_blob_param();
+      tg::bm1880::BlobParameter *outBlobParam =
+          layerCalibrationParam->add_blob_param();
       outBlobParam->set_name(out);
       outBlobParam->set_threshold_y(m_ThresholdY[out]);
     }

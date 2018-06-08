@@ -13,7 +13,7 @@
 #include <caffe2/core/init.h>
 #include <caffe2/core/net.h>
 
-#include "common_calibration.pb.h"
+#include "bm188x_common_calibration.pb.h"
 
 namespace onnc {
 ModulePass *createCalibrationPass(const std::string pDBName, int pI);
@@ -57,9 +57,9 @@ private:
   void thresholdFold(caffe2::NetDef &pDef);
 
   void Conv(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef,
-            LayerCalibrationParameter *pLayerCalibrationParam);
+            tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam);
   void Pool(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef,
-            LayerCalibrationParameter *pLayerCalibrationParam);
+            tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam);
 
 private:
   const std::string m_DBName;
@@ -77,7 +77,7 @@ private:
 
   std::unordered_map<std::string, float> m_ThresholdY;
 
-  NetCalibrationParameter m_NetCtableParam;
+  tg::bm1880::NetCalibrationParameter m_NetCtableParam;
   int m_Iteration;
 };
 } // namespace onnc

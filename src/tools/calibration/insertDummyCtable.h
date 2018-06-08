@@ -8,7 +8,7 @@
 #ifndef INSERT_DUMMY_CTABLE_H
 #define INSERT_DUMMY_CTABLE_H
 
-#include "common_calibration.pb.h"
+#include "bm188x_common_calibration.pb.h"
 #include <onnc/Core/ModulePass.h>
 #include <onnx/common/ir.h>
 

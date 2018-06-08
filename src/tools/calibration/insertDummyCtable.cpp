@@ -1,5 +1,5 @@
 #include "insertDummyCtable.h"
-#include "common_calibration.pb.h"
+#include "bm188x_common_calibration.pb.h"
 #include <onnc/Core/ModulePass.h>
 #include <onnx/common/ir.h>
 
@@ -12,7 +12,8 @@ class InsertDummyCtable : public ModulePass
 
   void insertLayerName(::onnx::Node *pNode)
   {
-    LayerCalibrationParameter *layerParam = m_NetCtableParam.add_layer();
+    tg::bm1880::LayerCalibrationParameter *layerParam =
+        m_NetCtableParam.add_layer();
     // TODO multiple output
     assert(pNode->output()->has_unique_name());
     layerParam->set_name(pNode->output()->uniqueName());
@@ -54,7 +55,7 @@ public:
   }
 
 private:
-  NetCalibrationParameter m_NetCtableParam;
+  tg::bm1880::NetCalibrationParameter m_NetCtableParam;
 };
 
 char InsertDummyCtable::ID = 0;

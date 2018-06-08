@@ -5,8 +5,9 @@
 // See LICENSE.TXT for details.
 //
 //===----------------------------------------------------------------------===//
-void Calibration::Conv(const OperatorDef &pOp, caffe2::NetDef &pDef,
-                       LayerCalibrationParameter *pLayerCalibrationParam)
+void Calibration::Conv(
+    const OperatorDef &pOp, caffe2::NetDef &pDef,
+    tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam)
 {
   const string &inputName = pOp.input(0);
   const string &weightName = pOp.input(1);
@@ -31,8 +32,9 @@ void Calibration::Conv(const OperatorDef &pOp, caffe2::NetDef &pDef,
   pLayerCalibrationParam->set_right_shift_width(rightShift);
 }
 
-void Calibration::Pool(const OperatorDef &pOp, caffe2::NetDef &pDef,
-                       LayerCalibrationParameter *pLayerCalibrationParam)
+void Calibration::Pool(
+    const OperatorDef &pOp, caffe2::NetDef &pDef,
+    tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam)
 {
   const string &inputName = pOp.input(0);
   const string &outputName = pOp.output(0);

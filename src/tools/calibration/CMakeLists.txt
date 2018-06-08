@@ -3,6 +3,7 @@ include_directories(SYSTEM ${ONNC_INCLUDE_DIRS})
 include_directories(SYSTEM ${ONNX_INCLUDE_DIRS})
 include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
 include_directories(SYSTEM ${PYTORCH_INCLUDE_DIRS})
+include_directories(SYSTEM ${ONNC_BINARY_DIR}/lib/Target/TG/BM188x)
 add_definitions(-DONNX_NAMESPACE=onnx)
 
 add_definitions(-DTOPDIR="${ONNC_SOURCE_DIR}")
@@ -10,17 +11,10 @@ add_definitions(-DBUILDDIR="${ONNC_BINARY_DIR}")
 
 find_library(GLOG_LIB glog)
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/common_calibration.pb.cc
-    COMMAND protoc --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-    --cpp_out=${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/common_calibration.proto
-    COMMENT "Generating common_calibration.pb.cc from common_calibration.proto"
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/common_calibration.proto)
 
 add_compile_options(-Wall -Werror)
 
 add_executable(calibration
-    ${CMAKE_CURRENT_BINARY_DIR}/common_calibration.pb.cc
     Calibration.cpp
     Kld.cpp
     ONNXOptimizer.cpp
