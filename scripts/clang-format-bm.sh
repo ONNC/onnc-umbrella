@@ -4,7 +4,7 @@ cd $dir/..
 root=$PWD
 
 function format {
-    find $1 -regex '.*\.\(cpp\|hpp\|cc\|cxx\)' -exec clang-format -i {} \;
+    find $1 -regex '.*\.\(cpp\|h\|hpp\|cc\|cxx\)' -exec clang-format -i {} \;
     run-clang-tidy.py $1 -p build -header-filter="$1/.*" -fix
 }
 set -x

@@ -41,8 +41,8 @@ private:
                     const std::string &pDataLayer);
 
   template <class T>
-  void quantizeWeight(caffe2::Blob *pBlob, float pThresX, float pThresY, int pRightShift,
-                      caffe2::string pWName);
+  void quantizeWeight(caffe2::Blob *pBlob, float pThresX, float pThresY,
+                      int pRightShift, caffe2::string pWName);
 
   bool readDataset(caffe2::TensorCPU *pInputTensor,
                    const std::vector<int64_t> &pInputDims,
