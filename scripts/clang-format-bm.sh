@@ -10,6 +10,7 @@ function format {
 set -x
 git diff --exit-code #you should commit before run this script
 format $PWD/src/tools/calibration
+format $PWD/src/lib/Target/TG
 git diff --exit-code #return error if file changed
 
 
