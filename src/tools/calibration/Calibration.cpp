@@ -209,10 +209,9 @@ static int getMultiplier(float pX, float pY, int *pRightShift)
 
 template <class T>
 void Calibration::quantizeWeight(Blob *pBlob, float pThresX, float pThresY,
-                                 int pRightShift, string pName)
+                                 int pShiftScale, string pName)
 {
   auto tensor = pBlob->Get<TensorCPU>();
-  int shiftScale = 1 << pRightShift;
   if (tensor.IsType<float>()) {
     const auto &probs = tensor.data<float>();
     auto size = tensor.size();
@@ -226,7 +225,7 @@ void Calibration::quantizeWeight(Blob *pBlob, float pThresX, float pThresY,
 
     for (int i = 0; i < tensor.size(); i++) {
       float fWeight =
-          floor(probs[i] * ((pThresX / pThresY) * shiftScale) + 0.5);
+          floor(probs[i] * ((pThresX / pThresY) * pShiftScale) + 0.5);
       T qWeight = saturate<T>((int)fWeight);
 
       if (std::is_same<T, int8_t>::value) {

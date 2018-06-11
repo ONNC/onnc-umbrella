@@ -20,12 +20,12 @@ void Calibration::Conv(
   auto wBlob = m_Workspace->GetBlob(weightName);
   int rightShift = getRightShift(wBlob, thresX / thresY);
 
-  quantizeWeight<int8_t>(wBlob, thresX, thresY, rightShift, weightName);
+  quantizeWeight<int8_t>(wBlob, thresX, thresY, 1 << rightShift, weightName);
 
   if (pOp.input_size() == 3) {
     const string &biasName = pOp.input(2);
     auto bBlob = m_Workspace->GetBlob(biasName);
-    quantizeWeight<int16_t>(bBlob, 128, thresY, rightShift, biasName);
+    quantizeWeight<int16_t>(bBlob, 128, thresY, 1 << rightShift, biasName);
   }
 
   // Setup Ctable parameters.
