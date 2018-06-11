@@ -101,3 +101,49 @@ void Calibration::Eltwise(
   delete[] rightShift;
   delete[] thres_x_quantized;
 }
+
+void Calibration::PRelu(
+    const OperatorDef &pOp, caffe2::NetDef &pDef,
+    tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam)
+{
+  const string &inputName = pOp.input(0);
+  const string &slopeName = pOp.input(1);
+  const string &outputName = pOp.output(0);
+  caffe2::Blob *sBlob = m_Workspace->GetBlob(slopeName);
+  const caffe2::TensorCPU sTensor = sBlob->Get<TensorCPU>();
+
+  float thresX = m_ThresholdY[inputName];
+  float thresY = m_ThresholdY[outputName];
+  int gt_rshift = 0;
+  int gt_scale = 0;
+  int gt_shift_scale = 0;
+  int le_rshift = 0;
+  int le_shift_scale = 0;
+  tg::bm1880::PReLUCalibrationParameter *prelu_cal_param =
+      pLayerCalibrationParam->mutable_prelu_param();
+
+  // calculate gt_scale and gt_tshift
+  gt_rshift = calRightShift(std::vector<float>{ 1.0 }, thresX / thresY);
+  if (gt_rshift < 0)
+    gt_shift_scale = (int)(1.0 / (1 << (-gt_rshift)));
+  else
+    gt_shift_scale = (1 << gt_rshift);
+  gt_scale = (int)floor((((thresX / thresY) * gt_shift_scale) + 0.5));
+  gt_scale = saturate<int8_t>(gt_scale);
+  prelu_cal_param->set_gt_scale(gt_scale);
+  prelu_cal_param->set_gt_right_shift_width(gt_rshift);
+
+  // calculate le_rshift
+  auto slopes = sTensor.data<float>();
+  int size = sTensor.size();
+  le_rshift =
+      calRightShift(std::vector<float>(slopes, slopes + size), thresX / thresY);
+  prelu_cal_param->set_le_right_shift_width(le_rshift);
+
+  // quantize slope weights
+  if (le_rshift < 0)
+    le_shift_scale = (int)(1.0 / (1 << (-le_rshift)));
+  else
+    le_shift_scale = (1 << le_rshift);
+  quantizeWeight<int8_t>(sBlob, thresX, thresY, le_shift_scale, slopeName);
+}

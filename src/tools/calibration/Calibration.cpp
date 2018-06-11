@@ -468,6 +468,8 @@ void Calibration::getRightShiftQuantize(caffe2::NetDef &pDef)
       Pool(op, pDef, layerCalibrationParam);
     } else if (op.type() == "Sum" || op.type() == "Max" || op.type() == "Mul") {
       Eltwise(op, pDef, layerCalibrationParam);
+    } else if (op.type() == "PRelu") {
+      PRelu(op, pDef, layerCalibrationParam);
     } else if (op.type() == "Relu" || op.type() == "Flatten" ||
                op.type() == "Concat" || op.type() == "Reshape") {
       // Do nothing.
