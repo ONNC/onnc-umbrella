@@ -1,6 +1,7 @@
 [submodule "external/SkyPat"]
 	path = external/SkyPat
     url = https://github.com/skymizer/SkyPat.git
+    ignore = dirty # skypat does not support out-of-source build
 [submodule "external/onnx"]
 	path = external/onnx
 	url = https://github.com/onnx/onnx.git

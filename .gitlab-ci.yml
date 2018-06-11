@@ -15,10 +15,12 @@ build:
   stage: build
   script:
     - mkdir build
-    - cd build
+    - pushd build
     - cmake ..
     - make -j$(nproc)
     - ctest -j$(nproc)
+    - popd
+    - ./scripts/clang-format-bm.sh
 
 build_separate:
   stage: build
@@ -70,11 +72,3 @@ clang_format:
     - popd
     - ./scripts/clang-format.sh
 
-clang_format_bm:
-  stage: code_review
-  script:
-    - mkdir build
-    - pushd build
-    - cmake ..
-    - popd
-    - ./scripts/clang-format-bm.sh

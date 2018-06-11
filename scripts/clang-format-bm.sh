@@ -1,6 +1,7 @@
 #!/bin/bash -e
 dir=`dirname $0`
 cd $dir/..
+root=$PWD
 
 function format {
     find $1 -regex '.*\.\(cpp\|hpp\|cc\|cxx\)' -exec clang-format -i {} \;
@@ -8,7 +9,7 @@ function format {
 }
 set -x
 git diff --exit-code #you should commit before run this script
-format src/tools/calibration
+format $PWD/src/tools/calibration
 git diff --exit-code #return error if file changed
 
 
