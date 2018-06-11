@@ -66,12 +66,12 @@ void Calibration::Eltwise(
   if (pOp.type() == "Sum" || pOp.type() == "Max") {
     for (int i = 0; i < input_num; ++i)
       rightShift[i] =
-          calRightShift(std::array<float, 1>{ { thresX[i] / thresY } }, 1.0);
+          calRightShift(std::vector<float>{ thresX[i] / thresY }, 1.0);
   } else if (pOp.type() == "Mul") {
     float thres_x_cal = 128.0;
     for (int i = 0; i < input_num; ++i)
       thres_x_cal *= thresX[i] / 128.0;
-    rightShift[0] = calRightShift(std::array<float, 1>{ { thres_x_cal } }, 1.0);
+    rightShift[0] = calRightShift(std::vector<float>{ thres_x_cal }, 1.0);
   }
 
   // use min rightShift as final rightShift

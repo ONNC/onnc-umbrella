@@ -121,8 +121,7 @@ static int getRightShift(Blob *pBlob, float pScale)
   return m;
 }
 
-template <std::size_t SIZE>
-static int calRightShift(const std::array<float, SIZE> &pData, float pScale)
+static int calRightShift(const std::vector<float> &pData, float pScale)
 {
   float max{ 0.0 };
   for (auto &d : pData) {
