@@ -54,7 +54,7 @@ RUN apt-get update \
 
 ENV PATH="${PATH}:/usr/lib/llvm-5.0/bin"
 ENV PATH="${PATH}:/usr/lib/llvm-5.0/share/clang"
-RUN ln -s /usr/bin/clang-format-diff-5.0  /usr/bin/clang-format-diff.py
+ENV PATH="${PATH}:/usr/share/clang/clang-format-5.0"
 
 RUN pip install protobuf
 

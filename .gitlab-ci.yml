@@ -1,4 +1,4 @@
-image: iclink/onnc_dev:1.5
+image: iclink/onnc_dev:1.5.1
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -69,3 +69,12 @@ clang_format:
     - cmake ..
     - popd
     - ./scripts/clang-format.sh
+
+clang_format_bm:
+  stage: code_review
+  script:
+    - mkdir build
+    - pushd build
+    - cmake ..
+    - popd
+    - ./scripts/clang-format-bm.sh
