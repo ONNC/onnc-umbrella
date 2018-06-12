@@ -45,6 +45,12 @@ private:
   void profileModel(int pIteration, caffe2::NetDef &pDef,
                     const std::string &pDataLayer);
 
+  std::vector<float> getTensor(const std::string &pName);
+
+  template <class T>
+  void quantizeWeight(std::vector<float> &pBlob, float pThresX, float pThresY,
+                      int pShiftScale, const std::string &pName);
+
   template <class T>
   void quantizeWeight(caffe2::Blob *pBlob, float pThresX, float pThresY,
                       int pRightShift, caffe2::string pWName);
@@ -64,6 +70,8 @@ private:
             tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam);
   void PRelu(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef,
              tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam);
+  void SpatialBN(const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef,
+                 tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam);
 
 private:
   const std::string m_DBName;

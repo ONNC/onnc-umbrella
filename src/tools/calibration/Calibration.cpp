@@ -207,6 +207,40 @@ static int getMultiplier(float pX, float pY, int *pRightShift)
   return multiplier;
 }
 
+std::vector<float> Calibration::getTensor(const std::string &pName)
+{
+  auto *blob = m_Workspace->GetBlob(pName);
+  const caffe2::TensorCPU tensor = blob->Get<TensorCPU>();
+  return std::vector<float>(tensor.data<float>(),
+                            tensor.data<float>() + tensor.size());
+}
+
+template <class T>
+void Calibration::quantizeWeight(std::vector<float> &pBlob, float pThresX,
+                                 float pThresY, int pShiftScale,
+                                 const std::string &pName)
+{
+  auto size = pBlob.size();
+  if (std::is_same<T, int8_t>::value) {
+    m_QWeights[pName].reserve(size);
+  } else if (std::is_same<T, int16_t>::value) {
+    m_QBias[pName].reserve(size);
+  } else {
+    throw std::runtime_error("Quantized type not support!");
+  }
+
+  for (size_t i = 0; i < pBlob.size(); i++) {
+    float fWeight = floor(pBlob[i] * ((pThresX / pThresY) * pShiftScale) + 0.5);
+    T qWeight = saturate<T>((int)fWeight);
+
+    if (std::is_same<T, int8_t>::value) {
+      m_QWeights[pName].emplace_back(qWeight);
+    } else if (std::is_same<T, int16_t>::value) {
+      m_QBias[pName].emplace_back(qWeight);
+    }
+  }
+}
+
 template <class T>
 void Calibration::quantizeWeight(Blob *pBlob, float pThresX, float pThresY,
                                  int pShiftScale, string pName)
@@ -473,6 +507,8 @@ void Calibration::getRightShiftQuantize(caffe2::NetDef &pDef)
     } else if (op.type() == "Relu" || op.type() == "Flatten" ||
                op.type() == "Concat" || op.type() == "Reshape") {
       // Do nothing.
+    } else if (op.type() == "SpatialBN") {
+      SpatialBN(op, pDef, layerCalibrationParam);
     } else {
       // FIXME: Add assert in the future.
       errs() << Color::RED << "Error" << Color::RESET << ": Unsupport op type "
