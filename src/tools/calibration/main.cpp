@@ -8,6 +8,7 @@
 
 #include "Calibration.h"
 #include "ONNXOptimizer.h"
+#include "ONNXShapeInference.h"
 #include <boost/program_options.hpp>
 #include <fstream>
 #include <iostream>
@@ -69,7 +70,7 @@ int main(int pArgc, char *pArgv[])
     onnc::PassManager pm;
     pm.add(onnc::createONNCModulePrinterPass());
     pm.add(onnc::createRemoveUnusedNodesPass());
-    pm.add(onnc::CreateUpdateGraphOutputSizePass());
+    pm.add(onnc::createONNXShapeInferencePass());
     pm.add(onnc::createONNXOptimizerPass());
     pm.run(*module);
   }
