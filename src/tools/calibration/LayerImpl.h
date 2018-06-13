@@ -148,6 +148,7 @@ void Calibration::PRelu(
   quantizeWeight<int8_t>(sBlob, thresX, thresY, le_shift_scale, slopeName);
 }
 
+#define DEBUG_BN 0
 void Calibration::SpatialBN(
     const caffe2::OperatorDef &pOp, caffe2::NetDef &pDef,
     tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam)
@@ -155,29 +156,32 @@ void Calibration::SpatialBN(
   const string &input_name = pOp.input(0);    // INPUT
   const string &scale_name = pOp.input(1);    // SCALE
   const string &bias_name = pOp.input(2);     // BIAS
-  const string &est_mean_name = pOp.input(3); // EST_MEAN
-  const string &est_var_name = pOp.input(4);  // EST_VAR
+  const string &mean_name = pOp.input(3);     // EST_MEAN
+  const string &variance_name = pOp.input(4); // EST_VAR
   const string &output_name = pOp.output(0);  // OUTPUT
   float thresX = m_ThresholdY[input_name];
   float thresY = m_ThresholdY[output_name];
 
   // We can fuse the output computation as follows:
-  //  (x - est_mean) * (inv_var) * scale + bias
+  //  (x - mean) * (inv_var) * scale + bias
   //  to
-  //  (x * inv_var * scale) + (bias - est_mean * inv_var * scale)
+  //  (x * inv_var * scale) + (bias - mean * inv_var * scale)
   //
-  // inv_var = (est_var + epsilon).sqrt().inverse()
+  // inv_var = (variance + epsilon).sqrt().inverse()
 
-  std::vector<float> est_var = getTensor(est_var_name);
+  std::vector<float> variance = getTensor(variance_name);
   std::vector<float> inv_var;
   float epsilon = 1e-5f;
-  for (auto &est : est_var) {
-    // FIXME if est is too small, how to handle it?
-    if (est > 1e-5f)
-      inv_var.push_back(1.0 / sqrt(est + epsilon));
-    else
-      inv_var.push_back(inv_var[inv_var.size() - 1]);
-    std::cout << "inv_var:" << 1.0 / sqrt(est + epsilon) << std::endl;
+
+  float variance_average =
+      std::accumulate(variance.begin(), variance.end(), 0) / variance.size();
+  std::vector<bool> disable_channel(variance.size(), false);
+  float threshold_zero = variance_average / 256;
+  for (size_t i = 0; i < variance.size(); ++i) {
+    inv_var.push_back(1.0 / sqrt(variance[i] + epsilon));
+    if (variance[i] < threshold_zero) {
+      disable_channel[i] = true;
+    }
   }
 
   // calculate new scale and bias
@@ -185,17 +189,33 @@ void Calibration::SpatialBN(
   std::vector<float> new_bias;
   std::vector<float> scale_var = getTensor(scale_name);
   std::vector<float> bias_var = getTensor(bias_name);
-  std::vector<float> mean_var = getTensor(est_mean_name);
+  std::vector<float> mean_var = getTensor(mean_name);
   for (size_t i = 0; i < inv_var.size(); ++i) {
-    new_scale.push_back(inv_var[i] * scale_var[i]);
-    new_bias.push_back(bias_var[i] - mean_var[i] * inv_var[i] * scale_var[i]);
+    if (!disable_channel[i]) {
+      new_scale.push_back(inv_var[i] * scale_var[i]);
+      new_bias.push_back(bias_var[i] -
+                         (mean_var[i] * scale_var[i]) * inv_var[i]);
+    } else {
+      new_scale.push_back(0);
+      new_bias.push_back(0);
+    }
   }
   int rshift = calRightShift(new_scale, thresX / thresY);
   assert(rshift >= 0);
 
-  quantizeWeight<int8_t>(new_scale, thresY, thresX, 1 << rshift, scale_name);
-  quantizeWeight<int16_t>(new_bias, 128, thresX, 1 << rshift, bias_name);
-
+  quantizeWeight<int8_t>(new_scale, thresX, thresY, 1 << rshift, scale_name);
+  quantizeWeight<int16_t>(new_bias, 128, thresY, 1 << rshift, bias_name);
+#if DEBUG_BN
+  std::cout << "rshift:" << rshift << "\n";
+  std::cout << "variance: [  \n";
+  for (size_t i = 0; i < m_QWeights[scale_name].size(); ++i) {
+    std::cout << i << ":" << (int)m_QWeights[scale_name][i] << "\n";
+  }
+  std::cout << "mean: [  \n";
+  for (size_t i = 0; i < m_QBias[bias_name].size(); ++i) {
+    std::cout << i << ":" << (int)m_QBias[bias_name][i] << "\n";
+  }
+#endif
   // Setup Ctable parameters.
   pLayerCalibrationParam->set_right_shift_width(rshift);
 }
