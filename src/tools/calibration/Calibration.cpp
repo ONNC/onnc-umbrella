@@ -87,6 +87,7 @@ const std::vector<int64_t> getInputDataDim(const ::onnx::Graph &pConstGraph)
 } // anonymous namespace
 
 namespace onnc {
+
 static int getRightShift(Blob *pBlob, float pScale)
 {
   int m = 0;
@@ -95,9 +96,8 @@ static int getRightShift(Blob *pBlob, float pScale)
     const auto &probs = tensor.data<float>();
     auto size = tensor.size();
     // Find max abs in the tensor.
-    float max = *std::max_element(probs, probs + size);
-    float min = *std::max_element(probs, probs + size);
-    float abs_max = (std::abs(min) > max) ? std::abs(min) : max;
+    auto cmp = [](float pA, float pB) { return (std::abs(pA) < std::abs(pB)); };
+    float abs_max = std::abs(*std::max_element(probs, probs + size, cmp));
     float data_max = abs_max * pScale;
     if (data_max <= 0) {
       std::cout << "data_max = " << data_max << std::endl;
