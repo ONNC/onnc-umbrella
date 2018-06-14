@@ -16,7 +16,6 @@ add_executable(calibration
     Calibration.cpp
     Kld.cpp
     ONNXOptimizer.cpp
-    ONNXShapeInference.cpp
     insertDummyCtable.cpp
     main.cpp
     quantizeWeight.cpp)
