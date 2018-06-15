@@ -5,7 +5,7 @@ root=$PWD
 
 function format {
     find $1 -regex '.*\.\(cpp\|h\|hpp\|cc\|cxx\)' -exec clang-format -i {} \;
-    run-clang-tidy.py $1 -p build -header-filter="$1/.*" -fix
+    run-clang-tidy.py $1 -p build -header-filter="$1/.*" -fix -quiet
 }
 set -x
 git diff --exit-code #you should commit before run this script
