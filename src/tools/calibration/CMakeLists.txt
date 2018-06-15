@@ -26,3 +26,9 @@ target_link_libraries(calibration
     ${PYTORCH_LIBRARIES}
     ${GLOG_LIB})
 add_test(NAME calibration COMMAND calibration -h)
+
+install(TARGETS calibration
+    RUNTIME DESTINATION bin)
+
+install(FILES ${PYTORCH_INSTALL_DIR}/lib/libcaffe2.so
+    DESTINATION lib)
