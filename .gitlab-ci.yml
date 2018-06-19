@@ -1,24 +1,26 @@
-image: iclink/onnc_dev:1.1
+image: iclink/onnc_dev:1.5.1
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
 
 stages:
+  - code_review
   - build
-  - build_ninja
 
 before_script:
   - git clean -ffdx
-  - git submodule foreach git clean -ffdx
+  - git submodule foreach --recursive git clean -ffdx
 
 build:
   stage: build
   script:
     - mkdir build
-    - cd build
+    - pushd build
     - cmake ..
     - make -j$(nproc)
     - ctest -j$(nproc)
+    - popd
+    - ./scripts/clang-format-bm.sh
 
 build_separate:
   stage: build
@@ -36,6 +38,7 @@ build_separate:
           -DBMTAP_INSTALL_DIR=$PWD/../build_external/Install/bmtap2
           -DBMTAP_SOURCE_DIR=$PWD/../external/bmtap2
           -DBMTAP_BINARY_DIR=$PWD/../build_external/Build/bmtap2
+          -DPYTORCH_INSTALL_DIR=$PWD/../build_external/Install/pytorch
     -   make -j$(nproc)
     -   ctest -j$(nproc)
     - popd
@@ -48,3 +51,24 @@ build_ninja:
     - cmake .. -G Ninja
     - ninja
     - ctest -j$(nproc)
+
+newline:
+  stage: code_review
+  script:
+    - if git grep -Il $'\r'; then false; fi
+
+namespace:
+  stage: code_review
+  script:
+    - if git grep "^using.*namespace" --  '*.h'; then false; fi
+
+clang_format:
+  stage: code_review
+  allow_failure: true
+  script:
+    - mkdir build
+    - pushd build
+    - cmake ..
+    - popd
+    - ./scripts/clang-format.sh
+

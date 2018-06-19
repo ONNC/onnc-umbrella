@@ -42,32 +42,39 @@ add_dependencies(build_external skypat)
 option_enum(NAME CMAKE_BUILD_TYPE_ONNX VALUE Debug Release)
 ExternalProject_Add(onnx
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/onnx
-    INSTALL_COMMAND cmake -E echo "Skipping install step."
     BUILD_ALWAYS ${BUILD_EXT_ALWAYS}
     BUILD_BYPRODUCTS Install/onnx/lib/libonnx.a Install/onnx/lib/libonnx_proto.a # for ninja
     CMAKE_ARGS
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE_ONNX}
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>)
-ExternalProject_Add_Step(onnx install_hack 
-    COMMAND mkdir -p <INSTALL_DIR>/lib <INSTALL_DIR>/include
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different <BINARY_DIR>/libonnx.a <INSTALL_DIR>/lib
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different <BINARY_DIR>/libonnx_proto.a <INSTALL_DIR>/lib
-    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/onnx <INSTALL_DIR>/include/onnx
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different <BINARY_DIR>/onnx/onnx.pb.h <INSTALL_DIR>/include/onnx
-    WORKING_DIRECTORY <BINARY_DIR>
-    DEPENDEES build)
 add_dependencies(build_external onnx)
 
 option_enum(NAME CMAKE_BUILD_TYPE_TG VALUE Debug Release CHECK TARGET_TG)
+option_enum(NAME TARGET_TG_ARCH VALUE BM1880 BM1680 BM1682 CHECK TARGET_TG)
 if (TARGET_TG)
     ExternalProject_Add(bmtap2
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bmtap2
-        BUILD_BYPRODUCTS Install/bmtap2/lib/libbmnet.so Install/bmtap2/lib/libbmkernel-static.a
+        BUILD_BYPRODUCTS
+        Install/bmtap2/lib/libbmnet.so
+        Install/bmtap2/lib/libbmkernel-static.a
+        Install/bmtap2/lib/libbm_cmodel.so
+        Install/bmtap2/lib/libbmutils.so
+        Install/bmtap2/lib/libbmruntime.so
         BUILD_ALWAYS ${BUILD_EXT_ALWAYS}
         CMAKE_ARGS
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE_TG}
         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-        -DCHIP=BM1680
+        -DCHIP=${TARGET_TG_ARCH}
         -Dbuild_bmnet=ON)
     add_dependencies(build_external bmtap2)
 endif()
+ExternalProject_Add(pytorch
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pytorch
+    BUILD_BYPRODUCTS # for ninja
+    Install/pytorch/lib/libonnx.a
+    Install/pytorch/lib/libonnx_proto.a 
+    Install/pytorch/lib/libcaffe2.so
+    CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+    -DBUILD_CUSTOM_PROTOBUF=OFF)
+add_dependencies(build_external pytorch)

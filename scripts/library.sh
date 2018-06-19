@@ -291,6 +291,7 @@ function build_onnx
     cmake \
     "-DCMAKE_BUILD_TYPE=Release" \
     "-DCMAKE_INSTALL_PREFIX=${INSTALLDIR}" \
+    "-DONNX_NAMESPACE=onnx" \
     "${SRCDIR}"
 
   local MAX_MAKE_JOBS=${MAX_MAKE_JOBS-2}
@@ -320,7 +321,7 @@ function build_onnx
   popd > /dev/null
 }
 
-function build_bmtap
+function build_bmtap2
 {
   local SRCDIR=$1
   local NAME=$(basename "${SRCDIR}")
@@ -329,30 +330,15 @@ function build_bmtap
   local INSTALLDIR=$2
 
   shift; shift
+
+  if [ ! -d "${BUILDDIR}" ]; then
+    show "create build directory at '${BUILDDIR}'"
+    mkdir -p "${BUILDDIR}"
+  fi
 
   show "building ${NAME} src=${SRCDIR} build=${BUILDDIR} install=${INSTALLDIR} ..."
-  pushd ${EXTDIR}
-  source ${EXTDIR}/build/envsetup.sh
-  source ${EXTDIR}/build/envsetup_bmtap.sh
-  build_bmtap
+  pushd ${BUILDDIR}
+  cmake ${SRCDIR}
+  make all install
   popd
 }
-
-function build_bmnet
-{
-  local SRCDIR=$1
-  local NAME=$(basename "${SRCDIR}")
-  local EXTDIR=$(dirname "${SRCDIR}")
-  local BUILDDIR=$(getabs "build-${NAME}")
-  local INSTALLDIR=$2
-
-  shift; shift
-
-  show "building ${NAME} ..."
-  pushd ${EXTDIR}
-  source ${EXTDIR}/build/envsetup.sh
-  source ${EXTDIR}/build/envsetup_bmnet.sh
-  build_bmnet_all
-  popd
-}
-

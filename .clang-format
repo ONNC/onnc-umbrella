@@ -1,2 +1,10 @@
+---
 BasedOnStyle: LLVM
-IndentWidth: 2
+BraceWrapping:   
+  AfterClass:      true
+  AfterFunction:   true
+  AfterObjCDeclaration: true
+BreakBeforeBraces: Custom
+Cpp11BracedListStyle: false
+PenaltyBreakComment: 60
+Standard:        Cpp03

@@ -108,9 +108,7 @@ function build_external
 
   fail_panic "directory not found: ${ONNC_EXTSRCDIR}" test -d "${ONNC_EXTSRCDIR}"
 
-  build_bmtap   "${ONNC_EXTSRCDIR}/bmtap"    "${ONNC_EXTDIR}"
-  build_bmnet   "${ONNC_EXTSRCDIR}/bmnet"    "${ONNC_EXTDIR}"
-
+  build_bmtap2   "${ONNC_EXTSRCDIR}/bmtap2"  "${ONNC_EXTDIR}"
   build_skypat  "${ONNC_EXTSRCDIR}/SkyPat"   "${ONNC_EXTDIR}"
   build_llvm    "${ONNC_EXTSRCDIR}/llvm"     "${ONNC_EXTDIR}"
   build_onnx    "${ONNC_EXTSRCDIR}/onnx"     "${ONNC_EXTDIR}"
@@ -134,6 +132,7 @@ function build_onnc
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-onnx="${ONNC_EXTDIR}" \
+                          --with-llvm="${ONNC_EXTDIR}" \
                           --with-skypat="${ONNC_EXTDIR}"
       ;;
     dbg)
@@ -141,6 +140,7 @@ function build_onnc
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --with-onnx="${ONNC_EXTDIR}" \
+                          --with-llvm="${ONNC_EXTDIR}" \
                           --enable-unittest --enable-targets=x86
       ;;
     rgn)
@@ -148,6 +148,7 @@ function build_onnc
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-onnx="${ONNC_EXTDIR}" \
                           --with-skypat="${ONNC_EXTDIR}" \
+                          --with-llvm="${ONNC_EXTDIR}" \
                           --enable-debug \
                           --enable-unittest \
                           --enable-regression
@@ -157,6 +158,7 @@ function build_onnc
                           --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-onnx="${ONNC_EXTDIR}/../external/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
+                          --with-llvm="${ONNC_EXTDIR}" \
                           --enable-optimize
       ;;
     *)

@@ -32,6 +32,7 @@ RUN apt-get update \
         cmake \
         g++ \
         python \
+        llvm-5.0-tools \
 # for onnx
         git \
         protobuf-compiler \
@@ -39,10 +40,27 @@ RUN apt-get update \
         python-pip \
         python-dev \
         python-setuptools \
+# for JSON
+        bison \
+        flex \
 # for build
         ninja-build \
         cmake-curses-gui \
+# for code-review
+        clang-5.0 \
+        clang-tidy-5.0 \
+        clang-format-5.0 \
     && rm -rf /var/lib/apt/lists/*
 
+ENV PATH="${PATH}:/usr/lib/llvm-5.0/bin"
+ENV PATH="${PATH}:/usr/lib/llvm-5.0/share/clang"
+ENV PATH="${PATH}:/usr/share/clang/clang-format-5.0"
+
 RUN pip install protobuf
+
+# for pytorch
+RUN pip install \
+      future \
+      numpy \
+      protobuf
 

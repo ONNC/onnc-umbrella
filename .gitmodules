@@ -1,9 +1,13 @@
 [submodule "external/SkyPat"]
 	path = external/SkyPat
     url = https://github.com/skymizer/SkyPat.git
+    ignore = dirty # skypat does not support out-of-source build
 [submodule "external/onnx"]
 	path = external/onnx
 	url = https://github.com/onnx/onnx.git
 [submodule "external/bmtap2"]
 	path = external/bmtap2
 	url = ../../bmsky/bmtap2.git
+[submodule "external/pytorch"]
+	path = external/pytorch
+	url = https://github.com/pytorch/pytorch.git
