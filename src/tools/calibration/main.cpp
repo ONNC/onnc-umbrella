@@ -31,6 +31,7 @@ int main(int pArgc, char *pArgv[])
   onnc::Path onnxPath;
   std::string datasetPath;
   std::string fileName;
+  std::string outProtoName;
   int iteration;
   bool fast;
   {
@@ -40,6 +41,7 @@ int main(int pArgc, char *pArgv[])
         ("help,h", "produce help message")
         ("onnx,x", po::value(&onnxPath)->required(), "*.onnx file")
         ("output,o", po::value(&fileName)->default_value("new.onnx"), "output *.onnx file")
+        ("outproto,", po::value(&outProtoName), "output *.prototxt file")
         ("dataset,s", po::value(&datasetPath)->required(), "calibration dataset path(.lmdb)")
         ("fast,f", po::bool_switch(&fast), "run calibration only")
         ("iteration,i", po::value(&iteration)->default_value(5), "iteration number");
@@ -100,6 +102,13 @@ int main(int pArgc, char *pArgv[])
     std::fstream output(fileName,
                         std::ios::out | std::ios::trunc | std::ios::binary);
     modelProto.SerializeToOstream(&output);
+
+    if (!outProtoName.empty()) {
+      // write prototxt file
+      std::ofstream outtxt(outProtoName);
+      outtxt << modelProto.DebugString();
+      outtxt.close();
+    }
   }
 
   return 0;
