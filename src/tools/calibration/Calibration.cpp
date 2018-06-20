@@ -95,18 +95,37 @@ static bool isBlobSingleUser(const string &pBlobName, caffe2::NetDef &pDef)
 }
 
 bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
-                              const string &pDataLayer, int pIteration)
+                              const string &pDataLayer, int pIteration,
+                              const Module::MetaDataMap &pMetaData)
 {
   auto nums = ::onnc::getTotalCount(pInputDims);
   auto reader = std::make_unique<caffe2::db::DBReader>("lmdb", m_DBName);
 
-  // TODO handle MTCNN dataset
-  bool is_imagenet_dataset = m_DBName.find("ilsvrc12") != std::string::npos;
-  if (!is_imagenet_dataset)
-    assert(m_DBName.find("mnist") != std::string::npos);
+  bool do_scale = false;
+  bool do_sub_mean = false;
+  if (pMetaData.find("data_scale") != pMetaData.end()) {
+    do_scale = true;
+  }
+  if (pMetaData.find("data_sub_mean") != pMetaData.end()) {
+    do_sub_mean = true;
+  }
 
   auto *curCursor = reader->cursor();
   curCursor->SeekToFirst();
+  float scale = 1.0;
+  std::vector<float> means;
+  if (do_scale) {
+    scale = std::stof(pMetaData.at("data_scale"));
+  }
+  if (do_sub_mean) {
+    std::string token;
+    std::istringstream tokenStream(pMetaData.at("data_sub_mean"));
+    char delimiter = ',';
+    while (std::getline(tokenStream, token, delimiter)) {
+      means.push_back(std::stof(token));
+    }
+    assert(means.size() == 3);
+  }
   for (int run = 0; run < pIteration; run++) {
     std::cout << "pInputDims NCHW: " << pInputDims << std::endl;
     std::vector<float> data;
@@ -127,16 +146,15 @@ bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
       assert(datum.channels() == pInputDims.at(1));
       int h_offset = (h - h_crop) / 2;
       int w_offset = (w - w_crop) / 2;
-      std::vector<float> mean = { 103.939, 116.779, 123.68 };
       for (int c = 0; c < datum.channels(); ++c) {
         for (int ih = h_offset; ih < h_offset + h_crop; ++ih) {
           for (int iw = w_offset; iw < w_offset + w_crop; ++iw) {
             int i = c * h * w + ih * w + iw;
             float pixel = (uint8_t)datum.data()[i];
-            if (is_imagenet_dataset)
-              pixel -= mean[c];
-            else
-              pixel /= 256; // FIXME: The scale "1/256" is only for mnist.
+            if (do_sub_mean)
+              pixel -= means[c];
+            if (do_scale)
+              pixel *= scale;
             data.push_back(pixel);
           }
         }
@@ -314,7 +332,8 @@ Pass::ReturnType Calibration::runOnModule(::onnc::Module &pModule)
   const string &dataLayer = op.input(0);
   m_Workspace->CreateBlob(dataLayer);
   auto graph = pModule.getGraphIR();
-  if (!readDataset(getInputDataDim(*graph.get()), dataLayer, m_Iteration)) {
+  if (!readDataset(getInputDataDim(*graph.get()), dataLayer, m_Iteration,
+                   pModule.getMetaData())) {
     errs() << Color::RED << "Error" << Color::RESET << ": Read data set fail..."
            << std::endl;
     return Pass::kModuleNoChanged;

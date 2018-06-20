@@ -46,7 +46,8 @@ private:
                     const std::string &pDataLayer);
 
   bool readDataset(const std::vector<int64_t> &pInputDims,
-                   const std::string &pDataLayer, int pIteration);
+                   const std::string &pDataLayer, int pIteration,
+                   const Module::MetaDataMap &pMetaData);
 
   void thresholdFold(caffe2::NetDef &pDef);
 
