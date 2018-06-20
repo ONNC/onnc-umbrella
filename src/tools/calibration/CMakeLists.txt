@@ -17,8 +17,7 @@ add_executable(calibration
     Kld.cpp
     ONNXOptimizer.cpp
     insertDummyCtable.cpp
-    main.cpp
-    quantizeWeight.cpp)
+    main.cpp)
 target_link_libraries(calibration
     libonnc
     ${ONNX_LIBRARIES}
