@@ -6,6 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 #include <caffe/proto/caffe.pb.h>
+#include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <onnc/ADT/Color.h>
 #include <onnc/Core/ModulePass.h>
 #include <onnc/IR/ONNXUtils.h>
@@ -103,11 +105,15 @@ bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
 
   bool do_scale = false;
   bool do_sub_mean = false;
+  bool do_caffe_mean_file = false;
   if (pMetaData.find("data_scale") != pMetaData.end()) {
     do_scale = true;
   }
   if (pMetaData.find("data_sub_mean") != pMetaData.end()) {
     do_sub_mean = true;
+  }
+  if (pMetaData.find("data_caffe_mean_file") != pMetaData.end()) {
+    do_caffe_mean_file = true;
   }
 
   auto *curCursor = reader->cursor();
@@ -125,6 +131,32 @@ bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
       means.push_back(std::stof(token));
     }
     assert(means.size() == 3);
+  }
+  if (do_caffe_mean_file) {
+    caffe::BlobProto mean_proto;
+    string mean_file = m_DBName + "/" + pMetaData.at("data_caffe_mean_file");
+    std::ifstream finput(mean_file, std::ifstream::binary);
+    if (finput.fail()) {
+      errs() << "error: can not open mean file : " << mean_file << "\n";
+      exit(1);
+    }
+    google::protobuf::io::IstreamInputStream raw_input(&finput);
+    google::protobuf::io::CodedInputStream coded_input(&raw_input);
+
+    bool success = mean_proto.ParseFromCodedStream(&coded_input);
+    if (success == false) {
+      errs() << "error: can not parse mean file : " << mean_file << "\n";
+      exit(1);
+    }
+
+    for (int i = 0; i < mean_proto.data_size(); ++i) {
+      means.push_back(mean_proto.data(i));
+    }
+  }
+  if (do_sub_mean && do_caffe_mean_file) {
+    errs() << "error: should not use 'data_sub_mean' and "
+              "'data_caffe_mean_file' concurrently\n";
+    exit(1);
   }
   for (int run = 0; run < pIteration; run++) {
     std::cout << "pInputDims NCHW: " << pInputDims << std::endl;
@@ -144,6 +176,8 @@ bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
       assert(h == w);
       assert(h_crop == w_crop);
       assert(datum.channels() == pInputDims.at(1));
+      assert(means.size() ==
+             (size_t)(datum.channels() * datum.height() * datum.width()));
       int h_offset = (h - h_crop) / 2;
       int w_offset = (w - w_crop) / 2;
       for (int c = 0; c < datum.channels(); ++c) {
@@ -153,6 +187,8 @@ bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
             float pixel = (uint8_t)datum.data()[i];
             if (do_sub_mean)
               pixel -= means[c];
+            if (do_caffe_mean_file)
+              pixel -= means[i];
             if (do_scale)
               pixel *= scale;
             data.push_back(pixel);
