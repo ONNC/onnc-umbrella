@@ -28,35 +28,6 @@ using namespace caffe2;
 
 namespace {
 
-void copyTensor(::onnx::Tensor &pDstTensor, const ::onnx::Tensor &pSrcTensor,
-                const std::string &pValueName,
-                const ::onnx::TensorProto_DataType pDataType)
-{
-  // copy sizes
-  auto &newTensorSize = pDstTensor.sizes();
-  newTensorSize = pSrcTensor.sizes();
-  // copy dataType
-  auto &newTensorType = pDstTensor.elem_type();
-  newTensorType = pDataType;
-  // copy segment info
-  if (pSrcTensor.is_segment()) {
-    pDstTensor.set_segment_begin_and_end(pSrcTensor.segment_begin(),
-                                         pSrcTensor.segment_end());
-  }
-  // copy name
-  if (pSrcTensor.hasName()) {
-    pDstTensor.setName(pSrcTensor.name());
-  }
-}
-
-template <class T>
-void copyData2Tensor(::onnx::Tensor &pTensor, const std::vector<T> &pDataVector)
-{
-  size_t size = pDataVector.size() * sizeof(T);
-  std::string rawData(reinterpret_cast<const char *>(pDataVector.data()), size);
-  pTensor.set_raw_data(rawData);
-}
-
 const std::vector<int64_t>
 getDimension(const std::vector< ::onnx::Dimension> pDims)
 {
@@ -87,73 +58,6 @@ const std::vector<int64_t> getInputDataDim(const ::onnx::Graph &pConstGraph)
 } // anonymous namespace
 
 namespace onnc {
-
-static int getRightShift(Blob *pBlob, float pScale)
-{
-  int m = 0;
-  auto tensor = pBlob->Get<TensorCPU>();
-  if (tensor.IsType<float>()) {
-    const auto &probs = tensor.data<float>();
-    auto size = tensor.size();
-    // Find max abs in the tensor.
-    auto cmp = [](float pA, float pB) { return (std::abs(pA) < std::abs(pB)); };
-    float abs_max = std::abs(*std::max_element(probs, probs + size, cmp));
-    float data_max = abs_max * pScale;
-    if (data_max <= 0) {
-      std::cout << "data_max = " << data_max << std::endl;
-      throw std::runtime_error("data_max <= 0");
-    }
-    while (data_max < 64) {
-      m += 1;
-      data_max *= 2;
-    }
-    while (data_max >= 128) {
-      std::cout << "data_max = " << data_max << std::endl;
-      std::cout << "Error in quantize_right_shift: rshift will be negative..."
-                << data_max << std::endl;
-      exit(-1);
-    }
-    return m;
-  } else {
-    // Assert.
-    throw std::runtime_error("Blob format is not float!");
-  }
-  return m;
-}
-
-static int calRightShift(const std::vector<float> &pData, float pScale)
-{
-  float max{ 0.0 };
-  for (auto &d : pData) {
-    float v = fabs(d);
-    if (v > max)
-      max = v;
-  }
-  max *= pScale;
-
-  if (max <= 0)
-    throw std::runtime_error("Error: calRightShift: max <= 0");
-  if (max >= 128)
-    throw std::runtime_error("Error: calRightShift: max > 128");
-
-  int s = 0;
-  while (max < 64) {
-    s += 1;
-    max *= 2;
-  }
-  return s;
-}
-
-template <class T> static inline T saturate(int pValue)
-{
-  const int32_t max = std::numeric_limits<T>::max();
-  const int32_t min = std::numeric_limits<T>::min();
-
-  T sValue = std::min(max, pValue);
-  sValue = std::max(min, pValue);
-
-  return sValue;
-}
 
 static bool isBlobUsed(const string &pBlobName, caffe2::NetDef &pDef,
                        const int pOpIdx)
@@ -188,89 +92,6 @@ static bool isBlobSingleUser(const string &pBlobName, caffe2::NetDef &pDef)
     }
   }
   return true;
-}
-
-static int getMultiplier(float pX, float pY, int *pRightShift)
-{
-  float denominatorCeiling = 256.0 / pX * pY;
-  int rightShift = 0;
-  float denominatorQuantized = 1.0;
-
-  while (denominatorQuantized * 2 < denominatorCeiling) {
-    rightShift += 1;
-    denominatorQuantized = float(1 << rightShift);
-  }
-
-  *pRightShift = rightShift;
-  int multiplier = (int)floor(((pX / pY) * denominatorQuantized) + 0.5);
-
-  return multiplier;
-}
-
-std::vector<float> Calibration::getTensor(const std::string &pName)
-{
-  auto *blob = m_Workspace->GetBlob(pName);
-  const caffe2::TensorCPU tensor = blob->Get<TensorCPU>();
-  return std::vector<float>(tensor.data<float>(),
-                            tensor.data<float>() + tensor.size());
-}
-
-template <class T>
-void Calibration::quantizeWeight(std::vector<float> &pBlob, float pThresX,
-                                 float pThresY, int pShiftScale,
-                                 const std::string &pName)
-{
-  auto size = pBlob.size();
-  if (std::is_same<T, int8_t>::value) {
-    m_QWeights[pName].reserve(size);
-  } else if (std::is_same<T, int16_t>::value) {
-    m_QBias[pName].reserve(size);
-  } else {
-    throw std::runtime_error("Quantized type not support!");
-  }
-
-  for (size_t i = 0; i < pBlob.size(); i++) {
-    float fWeight = floor(pBlob[i] * ((pThresX / pThresY) * pShiftScale) + 0.5);
-    T qWeight = saturate<T>((int)fWeight);
-
-    if (std::is_same<T, int8_t>::value) {
-      m_QWeights[pName].emplace_back(qWeight);
-    } else if (std::is_same<T, int16_t>::value) {
-      m_QBias[pName].emplace_back(qWeight);
-    }
-  }
-}
-
-template <class T>
-void Calibration::quantizeWeight(Blob *pBlob, float pThresX, float pThresY,
-                                 int pShiftScale, string pName)
-{
-  auto tensor = pBlob->Get<TensorCPU>();
-  if (tensor.IsType<float>()) {
-    const auto &probs = tensor.data<float>();
-    auto size = tensor.size();
-    if (std::is_same<T, int8_t>::value) {
-      m_QWeights[pName].reserve(size);
-    } else if (std::is_same<T, int16_t>::value) {
-      m_QBias[pName].reserve(size);
-    } else {
-      throw std::runtime_error("Quantized type not support!");
-    }
-
-    for (int i = 0; i < tensor.size(); i++) {
-      float fWeight =
-          floor(probs[i] * ((pThresX / pThresY) * pShiftScale) + 0.5);
-      T qWeight = saturate<T>((int)fWeight);
-
-      if (std::is_same<T, int8_t>::value) {
-        m_QWeights[pName].emplace_back(qWeight);
-      } else if (std::is_same<T, int16_t>::value) {
-        m_QBias[pName].emplace_back(qWeight);
-      }
-    }
-  } else {
-    throw std::runtime_error("Blob format is not float!");
-  }
 }
 
 bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
@@ -331,72 +152,6 @@ bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
   }
 
   return true;
-}
-
-void Calibration::updateQuantizeWeight(::onnx::Graph *pGraph)
-{
-  // update elemType
-  for (auto input : pGraph->inputs()) {
-    auto elemType = input->elemType();
-    if (elemType == ::onnx::TensorProto_DataType_FLOAT) {
-      auto name = input->uniqueName();
-      if (m_QWeights.count(name)) {
-        input->setElemType(::onnx::TensorProto_DataType_INT8);
-      } else if (m_QBias.count(name)) {
-        input->setElemType(::onnx::TensorProto_DataType_INT16);
-      } else {
-        // input data default is INT8
-        input->setElemType(::onnx::TensorProto_DataType_INT8);
-      }
-    } else {
-      // FIXME
-      std::cout << "FIXME: unsupported quantize type:"
-                << TensorProto_DataType_Name(elemType) << std::endl;
-    }
-  }
-
-  // update node's output elementType
-  for (::onnx::Node *node : pGraph->nodes()) {
-    for (::onnx::Value *out : node->outputs()) {
-      out->setElemType(::onnx::TensorProto_DataType_INT8);
-    }
-  }
-
-  // update Tensor
-  std::unordered_map<std::string, ::onnx::Tensor> valueTensorMap;
-  const std::vector< ::onnx::Tensor> initTensors = pGraph->initializers();
-  const std::vector<std::string> tensorNames = pGraph->initializer_names();
-  for (size_t i = 0; i < initTensors.size(); ++i) {
-    auto valueName = tensorNames[i];
-    auto oldTensor = initTensors[i];
-    if (1 == m_QWeights.count(valueName)) {
-      ::onnx::Tensor newTensor;
-      copyTensor(newTensor, oldTensor, valueName,
-                 ::onnx::TensorProto_DataType_INT8);
-      assert(m_QWeights[valueName].size() ==
-             ::onnc::getTotalCount(oldTensor.sizes()));
-      copyData2Tensor(newTensor, m_QWeights[valueName]);
-      valueTensorMap.emplace(valueName, newTensor);
-      continue;
-    } else if (1 == m_QBias.count(valueName)) {
-      ::onnx::Tensor newTensor;
-      copyTensor(newTensor, oldTensor, valueName,
-                 ::onnx::TensorProto_DataType_INT16);
-      assert(m_QBias[valueName].size() ==
-             ::onnc::getTotalCount(oldTensor.sizes()));
-      copyData2Tensor(newTensor, m_QBias[valueName]);
-      valueTensorMap.emplace(valueName, newTensor);
-      continue;
-    }
-    // FIXME
-    std::cout << "FIXME: unsupported tensor:" << oldTensor.name() << std::endl;
-    valueTensorMap.insert({ valueName, oldTensor });
-  }
-
-  pGraph->clearInitializers();
-  for (auto &kv : valueTensorMap) {
-    pGraph->addInitializer(kv.second, kv.first);
-  }
 }
 
 float Calibration::calculateKLD(const string &pBlobName)
@@ -482,8 +237,7 @@ void Calibration::profileModel(int pIteration, caffe2::NetDef &pDef,
   }
 }
 
-#include "LayerImpl.h"
-void Calibration::getRightShiftQuantize(caffe2::NetDef &pDef)
+void Calibration::updateThreshold(caffe2::NetDef &pDef)
 {
   for (const OperatorDef &op : pDef.op()) {
     tg::bm1880::LayerCalibrationParameter *layerCalibrationParam =
@@ -495,27 +249,8 @@ void Calibration::getRightShiftQuantize(caffe2::NetDef &pDef)
       outBlobParam->set_name(out);
       outBlobParam->set_threshold_y(m_ThresholdY[out]);
     }
-
-    if (op.type() == "Conv" || op.type() == "FC" || op.type() == "Scale") {
-      Conv(op, pDef, layerCalibrationParam);
-    } else if (op.type() == "MaxPool" || op.type() == "AveragePool") {
-      Pool(op, pDef, layerCalibrationParam);
-    } else if (op.type() == "Sum" || op.type() == "Max" || op.type() == "Mul") {
-      Eltwise(op, pDef, layerCalibrationParam);
-    } else if (op.type() == "PRelu") {
-      PRelu(op, pDef, layerCalibrationParam);
-    } else if (op.type() == "Relu" || op.type() == "Flatten" ||
-               op.type() == "Concat" || op.type() == "Reshape") {
-      // Do nothing.
-    } else if (op.type() == "SpatialBN") {
-      SpatialBN(op, pDef, layerCalibrationParam);
-    } else {
-      // FIXME: Add assert in the future.
-      errs() << Color::RED << "Error" << Color::RESET << ": Unsupport op type "
-             << op.type() << std::endl;
-    }
-    // TODO: Add other layers.
   }
+  return;
 }
 
 // Optimizations for Quantization.
@@ -590,15 +325,12 @@ Pass::ReturnType Calibration::runOnModule(::onnc::Module &pModule)
 
   thresholdFold(def);
 
-  // Caliculate right-shift each layer and Quantize weights.
-  getRightShiftQuantize(def);
+  updateThreshold(def);
 
   std::cout << m_NetCtableParam.DebugString() << std::endl;
   // write ctable
   pModule.getMetaData().insert(
       { "bm1880_ctable", m_NetCtableParam.DebugString() });
-  // write qWeights
-  updateQuantizeWeight(pModule.getGraphIR().get());
 
   delete backend;
 

@@ -5,6 +5,9 @@
 // See LICENSE.TXT for details.
 //
 //===----------------------------------------------------------------------===//
+
+/* FIXME: Remove this file after porting done. */
+
 void Calibration::Conv(
     const OperatorDef &pOp, caffe2::NetDef &pDef,
     tg::bm1880::LayerCalibrationParameter *pLayerCalibrationParam)

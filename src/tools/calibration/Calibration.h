@@ -40,25 +40,13 @@ public:
 private:
   float calculateKLD(const std::string &pBlobName);
 
-  void getRightShiftQuantize(caffe2::NetDef &pDef);
+  void updateThreshold(caffe2::NetDef &pDef);
 
   void profileModel(int pIteration, caffe2::NetDef &pDef,
                     const std::string &pDataLayer);
 
-  std::vector<float> getTensor(const std::string &pName);
-
-  template <class T>
-  void quantizeWeight(std::vector<float> &pBlob, float pThresX, float pThresY,
-                      int pShiftScale, const std::string &pName);
-
-  template <class T>
-  void quantizeWeight(caffe2::Blob *pBlob, float pThresX, float pThresY,
-                      int pRightShift, caffe2::string pWName);
-
   bool readDataset(const std::vector<int64_t> &pInputDims,
                    const std::string &pDataLayer, int pIteration);
-
-  void updateQuantizeWeight(::onnx::Graph *pGraph);
 
   void thresholdFold(caffe2::NetDef &pDef);
 
