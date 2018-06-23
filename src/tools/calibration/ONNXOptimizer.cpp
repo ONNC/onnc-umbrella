@@ -18,10 +18,12 @@ public:
 
   Pass::ReturnType runOnModule(Module &pModule) override
   {
-    std::vector<std::string> passNames{ "eliminate_nop_transpose",
-                                        "fuse_consecutive_transposes",
-                                        "fuse_transpose_into_gemm",
-                                        "fuse_add_bias_into_conv" };
+    std::vector<std::string> passNames{
+      "eliminate_nop_transpose",  "fuse_consecutive_transposes",
+      "fuse_transpose_into_gemm", "eliminate_unused_initializer",
+      "fuse_mul_add_into_bn",     "fuse_bn_into_conv",
+      "fuse_add_bias_into_conv"
+    };
     ::onnx::ModelProto modelProto;
     ::onnc::ExportModelProto(modelProto, pModule);
     ::onnx::optimization::Optimizer onnxOptimizer;
