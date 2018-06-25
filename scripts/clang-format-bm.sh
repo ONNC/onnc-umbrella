@@ -4,8 +4,8 @@ cd $dir/..
 root=$PWD
 
 function format {
-    find $1 -regex '.*\.\(cpp\|h\|hpp\|cc\|cxx\)' -exec clang-format -i {} \;
     run-clang-tidy.py $1 -p build -header-filter="$1/.*" -fix -quiet -j4
+    find $1 -regex '.*\.\(cpp\|h\|hpp\|cc\|cxx\)' -exec clang-format -i {} \;
 }
 set -x
 git diff --exit-code #you should commit before run this script
