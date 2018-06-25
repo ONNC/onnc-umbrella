@@ -176,8 +176,9 @@ bool Calibration::readDataset(const std::vector<int64_t> &pInputDims,
       assert(h == w);
       assert(h_crop == w_crop);
       assert(datum.channels() == pInputDims.at(1));
-      assert(means.size() ==
-             (size_t)(datum.channels() * datum.height() * datum.width()));
+      if (do_caffe_mean_file)
+        assert(means.size() ==
+               (size_t)(datum.channels() * datum.height() * datum.width()));
       int h_offset = (h - h_crop) / 2;
       int w_offset = (w - w_crop) / 2;
       for (int c = 0; c < datum.channels(); ++c) {
