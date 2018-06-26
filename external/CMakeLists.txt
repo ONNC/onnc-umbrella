@@ -68,13 +68,3 @@ if (TARGET_TG)
         -Dbuild_bmnet=ON)
     add_dependencies(build_external bmtap2)
 endif()
-ExternalProject_Add(pytorch
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pytorch
-    BUILD_BYPRODUCTS # for ninja
-    Install/pytorch/lib/libonnx.a
-    Install/pytorch/lib/libonnx_proto.a 
-    Install/pytorch/lib/libcaffe2.so
-    CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-    -DBUILD_CUSTOM_PROTOBUF=OFF)
-add_dependencies(build_external pytorch)

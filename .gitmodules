@@ -8,6 +8,3 @@
 [submodule "external/bmtap2"]
 	path = external/bmtap2
 	url = ../../bmsky/bmtap2.git
-[submodule "external/pytorch"]
-	path = external/pytorch
-	url = https://github.com/pytorch/pytorch.git
