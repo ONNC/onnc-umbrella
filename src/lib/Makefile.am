@@ -2,17 +2,34 @@ INCDIR=../include/onnc
 
 ONNC_SOURCES = \
 	IRReader/ONNXReader.cpp \
+	IR/ComputeOperand.cpp \
 	IR/ComputeOperator.cpp \
 	IR/ComputeGraph.cpp \
 	IR/Module.cpp \
 	IR/Dump.cpp \
+	IR/Define.cpp \
 	IR/ONNXUtils.cpp \
+	IR/Quadruple.cpp \
 	IR/IRBuilder.cpp \
+	IR/ONNCModulePrinter.cpp \
+	IR/Compute/Value.cpp \
+	IR/Compute/Scalar.cpp \
+	IR/Compute/Tensor.cpp \
+	IR/Compute/ATen.cpp \
+	IR/Compute/Abs.cpp \
+	IR/Compute/Add.cpp \
+	IR/Compute/Affine.cpp \
+	IR/Compute/Conv.cpp \
+	IR/Compute/Relu.cpp \
+	IR/Compute/LRN.cpp \
+	IR/Graph/Initializer.cpp \
 	Target/Target.cpp \
 	Target/TargetBackend.cpp \
 	Target/TargetRegistry.cpp \
 	Target/NPUTargetBackend.cpp \
 	Transforms/removeUnusedNodes.cpp \
+	Transforms/TensorSel/Lower.cpp \
+	Transforms/TensorSel/LowerRegistry.cpp \
 	Core/PassRegistry.cpp \
 	Core/PassManager.cpp \
 	Core/PassInfo.cpp \

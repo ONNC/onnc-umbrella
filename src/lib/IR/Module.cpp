@@ -13,99 +13,10 @@
 using namespace onnc;
 
 //===----------------------------------------------------------------------===//
-// Module
+// Non-member function
 //===----------------------------------------------------------------------===//
-Module::Module()
-  : m_pOnnxGraph(),
-    m_OnnxInfo(),
-    m_OnnxSetId(),
-    m_OnnxMetaData(),
-    m_ComputeGraphs() {
-}
-
-Module::Module(std::unique_ptr< ::onnx::Graph> pGraph)
-  : m_pOnnxGraph(std::move(pGraph)),
-    m_OnnxInfo(),
-    m_OnnxSetId(),
-    m_OnnxMetaData(),
-    m_ComputeGraphs() {
-}
-
-Module::~Module()
-{
-  if (1 < m_pOnnxGraph.use_count()) {
-    // display error because Module should response for the life cycle of IR.
-    error(onnx_graph_alive);
-  }
-  m_pOnnxGraph.reset();
-}
-
-Module& Module::delegate(std::unique_ptr< ::onnx::Graph> pGraph)
-{
-  m_pOnnxGraph = std::move(pGraph);
-  return *this;
-}
-
-ComputeGraph* Module::getComputeGraph(StringRef pName)
-{
-  if (m_ComputeGraphs.empty())
-    return nullptr;
-  ComputeGraphList::iterator cg = m_ComputeGraphs.find(pName);
-  if (m_ComputeGraphs.end() == cg)
-    return nullptr;
-  return cg->value();
-}
-
-const ComputeGraph* Module::getComputeGraph(StringRef pName) const
-{
-  if (m_ComputeGraphs.empty())
-    return nullptr;
-  ComputeGraphList::const_iterator cg = m_ComputeGraphs.find(pName);
-  if (m_ComputeGraphs.end() == cg)
-    return nullptr;
-  return cg->value();
-}
-
-ComputeGraph* Module::createComputeGraph(StringRef pName)
-{
-  bool exist = false;
-  ComputeGraphList::entry_type* entry = m_ComputeGraphs.insert(pName, exist);
-  if (exist)
-    return nullptr;
-
-  entry->setValue(new ComputeGraph(*this));
-  return entry->value();
-}
-
-void Module::print(std::ostream& pOS) const
-{
-  // TODO
-}
-
-template<>
-void Module::print(std::ostream& pOS, const ::onnx::Value& pValue) const
-{
-  pOS << TensorProto_DataType_Name(pValue.elemType()) << " tensor ";
-  // print dimension
-  auto sizes = pValue.sizes();
-  pOS << "<";
-  for (size_t i = 0; i < sizes.size(); ++i) {
-    if (i != 0) {
-      pOS << ", ";
-    }
-    if (sizes[i].is_int) {
-      pOS << sizes[i].dim;
-      continue;
-    }
-    pOS << sizes[i].param;
-  }
-  pOS << "> ";
-  pOS << '%' << pValue.uniqueName();
-}
-
-template<> void
-Module::print(std::ostream& pOS,
-              const ::onnx::Attributes<::onnx::Node>& pAttr) const
+inline static void
+PrintAttrs(std::ostream& pOS, const ::onnx::Attributes<::onnx::Node>& pAttr)
 {
   std::vector<::onnx::Symbol> attrNames = pAttr.attributeNames();
   if (attrNames.size() != 0)
@@ -197,10 +108,202 @@ Module::print(std::ostream& pOS,
   } // end of for
 }
 
+//===----------------------------------------------------------------------===//
+// Module
+//===----------------------------------------------------------------------===//
+Module::Module()
+  : m_pOnnxGraph(),
+    m_OnnxInfo(),
+    m_OnnxSetId(),
+    m_OnnxMetaData(),
+    m_ComputeGraphs() {
+}
+
+Module::Module(std::unique_ptr< ::onnx::Graph> pGraph)
+  : m_pOnnxGraph(std::move(pGraph)),
+    m_OnnxInfo(),
+    m_OnnxSetId(),
+    m_OnnxMetaData(),
+    m_ComputeGraphs() {
+}
+
+Module::~Module()
+{
+  if (1 < m_pOnnxGraph.use_count()) {
+    // display error because Module should response for the life cycle of IR.
+    error(onnx_graph_alive);
+  }
+  m_pOnnxGraph.reset();
+}
+
+Module& Module::delegate(std::unique_ptr< ::onnx::Graph> pGraph)
+{
+  if (m_pOnnxGraph)
+    m_pOnnxGraph.reset();
+  m_pOnnxGraph = std::move(pGraph);
+  return *this;
+}
+
+Module& Module::delegate(::onnx::Graph& pGraph)
+{
+  m_pOnnxGraph.reset(&pGraph);
+  return *this;
+}
+
+ComputeGraph* Module::getComputeGraph(StringRef pName)
+{
+  if (m_ComputeGraphs.empty())
+    return nullptr;
+  ComputeGraphList::iterator cg = m_ComputeGraphs.find(pName);
+  if (m_ComputeGraphs.end() == cg)
+    return nullptr;
+  return cg->value();
+}
+
+const ComputeGraph* Module::getComputeGraph(StringRef pName) const
+{
+  if (m_ComputeGraphs.empty())
+    return nullptr;
+  ComputeGraphList::const_iterator cg = m_ComputeGraphs.find(pName);
+  if (m_ComputeGraphs.end() == cg)
+    return nullptr;
+  return cg->value();
+}
+
+ComputeGraph* Module::createComputeGraph(StringRef pName)
+{
+  // Note: there are two instances of the graph name.
+  // One is in m_ComputeGraphs, another is in ComputeGraph object
+  bool exist = false;
+  ComputeGraphList::entry_type* entry = m_ComputeGraphs.insert(pName, exist);
+  if (exist)
+    return nullptr;
+
+  entry->setValue(new ComputeGraph(pName, *this, m_ComputeOperands));
+  return entry->value();
+}
+
+void Module::print(std::ostream& pOS) const
+{
+  if (!hasGraphIR()) {
+    pOS << "empty" << std::endl;
+    return;
+  }
+
+  pOS << "graph " << getGraphIR()->name() << "{\n";
+
+  // XXX: This is ONNX's failure. They forget to write a constant
+  // version of ::onnx::Graph::initializer_names()
+  ::onnx::Graph* graph = const_cast<::onnx::Graph*>(getGraphIR().get());
+
+  // dump graph initializers
+  pOS << "  initializers: {\n";
+
+  int i = 0;
+  while (i < graph->initializers().size()) {
+    pOS << "    tensor <";
+    for (int64_t size : graph->initializers()[i].sizes()) {
+      pOS << size << " ";
+    }
+    pOS << "> %" << graph->initializer_names()[i];
+    ++i;
+    if (i < graph->initializers().size())
+      pOS << ",\n";
+    else
+      pOS << "\n";
+  }
+  pOS << "  },\n";
+
+  // dump graph inputs
+  pOS << "  inputs : {\n";
+  i = 0;
+  while (i < getGraphIR()->inputs().size()) {
+    const ::onnx::Value* v = getGraphIR()->inputs()[i];
+    pOS << "    ";
+    print(pOS, *v);
+    ++i;
+    if (i < getGraphIR()->inputs().size())
+      pOS << ",\n";
+    else
+      pOS << "\n";
+  }
+  pOS << "  }\n";
+  pOS << "}\n";
+
+  // dump graph nodes
+  for (const ::onnx::Node *n : getGraphIR()->nodes()) {
+    if (::onnx::kUndefined == n->kind())
+      continue;
+
+    print(pOS, *n);
+  }
+
+  // dump graph outputs
+  pOS << "  return ";
+  for (int i = 0; i < getGraphIR()->outputs().size(); i++) {
+    if (i != 0)
+      pOS << ", ";
+
+    const ::onnx::Value *v = getGraphIR()->outputs()[i];
+    print(pOS, *v);
+  }
+  pOS << std::endl;
+}
+
+template<>
+void Module::print(std::ostream& pOS, const ::onnx::Value& pValue) const
+{
+  pOS << TensorProto_DataType_Name(pValue.elemType()) << " tensor ";
+  // print dimension
+  auto sizes = pValue.sizes();
+  pOS << "<";
+  for (size_t i = 0; i < sizes.size(); ++i) {
+    if (i != 0) {
+      pOS << ", ";
+    }
+    if (sizes[i].is_int) {
+      pOS << sizes[i].dim;
+      continue;
+    }
+    pOS << sizes[i].param;
+  }
+  pOS << "> ";
+  pOS << '%' << pValue.uniqueName();
+}
+
 template<>
 void Module::print(std::ostream& pOS, const ::onnx::Node& pNode) const
 {
-  // TODO
+  // print name
+  // XXX: This is ONNX's bug. They forget to write constant getters.
+  ::onnx::Node* node = const_cast<::onnx::Node*>(&pNode);
+  if (node->has_name())
+    pOS << "[" << node->name() << "] ";
+
+  // print outputs.
+  for (int i = 0; i < pNode.outputs().size(); ++i) {
+    if (i != 0)
+      pOS << ", ";
+
+    const ::onnx::Value *v = pNode.outputs()[i];
+    print(pOS, *v);
+  }
+
+  pOS << " = " << pNode.kind().toString();
+
+  // print attributes.
+  PrintAttrs(pOS, pNode);
+
+  // print inputs.
+  pOS << '(';
+  for (int i = 0; i < pNode.inputs().size(); ++i) {
+    if (i != 0)
+      pOS << ", ";
+
+    const ::onnx::Value *v = pNode.inputs()[i];
+    print(pOS, *v);
+  }
+  pOS << ")" << std::endl;
 }
 
 template<>

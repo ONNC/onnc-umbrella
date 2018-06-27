@@ -10,7 +10,7 @@
 #include <map>
 #include <memory>
 #include <onnc/IR/ComputeGraph.h>
-#include <onnc/IR/ComputeDefine.h>
+#include <onnc/IR/Compute/Define.h>
 #include <onnc/ADT/StringRef.h>
 #include <onnc/ADT/StringMap.h>
 #include <onnx/common/ir.h>
@@ -29,8 +29,8 @@ public:
   typedef ComputeGraphList::iterator compute_iterator;
   typedef ComputeGraphList::const_iterator const_compute_iterator;
 
-  typedef std::vector<ComputeOperand*> ComputeOperandList;
-  typedef std::vector<ComputeDefine*> ComputeDefineList;
+  typedef ComputeGraph::ArcList ComputeOperandList;
+  typedef std::vector<onnc::Define*> ComputeDefineList;
 
   typedef std::map<std::string, int64_t> OpsetImport;
   typedef std::map<std::string, std::string> MetaDataMap;
@@ -98,6 +98,9 @@ public:
 
   // move @ref pGraph from outside.
   Module& delegate(std::unique_ptr< ::onnx::Graph> pGraph);
+
+  // move @ref pGraph from outside.
+  Module& delegate(::onnx::Graph& pGraph);
 
   std::shared_ptr< ::onnx::Graph> getGraphIR() { return m_pOnnxGraph; }
 
@@ -181,10 +184,6 @@ template<> void Module::print<Module::MetaDataMap>(std::ostream& pOS) const;
 
 template<> void
 Module::print(std::ostream& pOS, const ::onnx::Value& pValue) const;
-
-template<> void
-Module::print(std::ostream& pOS,
-              const ::onnx::Attributes<::onnx::Node>& pAttr) const;
 
 template<> void
 Module::print(std::ostream& pOS, const ::onnx::Node& pNode) const;

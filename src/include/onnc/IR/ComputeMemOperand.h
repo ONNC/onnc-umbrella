@@ -19,10 +19,25 @@ namespace onnc {
 class ComputeMemOperand : public ComputeOperand
 {
 public:
-  unsigned getBankID() const;
+  ComputeMemOperand()
+    : m_Start(0), m_Length(0) {
+  }
+
+  ComputeMemOperand(uint32_t pStart, uint32_t pLength)
+    : m_Start(pStart), m_Length(pLength) {
+  }
+
+  void setStart(uint32_t pStart) { m_Start = pStart; }
+
+  uint32_t start() const { return m_Start; }
+
+  void setLength(uint32_t pLen) { m_Length = pLen; }
+
+  uint32_t length() const { return m_Length; }
 
 private:
-  unsigned m_BankID;
+  uint32_t m_Start;
+  uint32_t m_Length;
 };
 
 } // namespace of onnc

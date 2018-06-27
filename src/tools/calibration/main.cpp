@@ -58,8 +58,8 @@ int main(int pArgc, char *pArgv[])
   }
 
   onnc::onnx::Reader reader;
-  onnc::SystemError err;
-  std::unique_ptr<onnc::Module> module(reader.parse(onnxPath, err));
+  onnc::Module module;
+  onnc::SystemError err = reader.parse(onnxPath, module);
 
   if (!err.isGood()) {
     std::cerr << "load onnx model \"" << onnxPath << "\" failed!\n";
@@ -73,7 +73,7 @@ int main(int pArgc, char *pArgv[])
     pm.add(onnc::createRemoveUnusedNodesPass());
     pm.add(onnc::CreateUpdateGraphOutputSizePass());
     pm.add(onnc::createONNXOptimizerPass());
-    pm.run(*module);
+    pm.run(module);
   }
   std::cout << "after onnx optimizer pass" << std::endl;
 
@@ -84,20 +84,20 @@ int main(int pArgc, char *pArgv[])
       pm.add(onnc::createONNCModulePrinterPass());
     pm.add(onnc::createONNCNodeNameGenPass());
     pm.add(onnc::createCalibrationPass(datasetPath, iteration));
-    pm.run(*module);
+    pm.run(module);
   }
 
   std::cout << "after createCalibrationPass" << std::endl;
   if (!fast) {
     onnc::PassManager pm;
     pm.add(onnc::createONNCModulePrinterPass());
-    pm.run(*module);
+    pm.run(module);
   }
 
   // write the new onnx model back to disk
   {
     ::onnx::ModelProto modelProto;
-    ::onnc::ExportModelProto(modelProto, *module);
+    ::onnc::ExportModelProto(modelProto, module);
     // wrtie file
     std::fstream output(fileName,
                         std::ios::out | std::ios::trunc | std::ios::binary);

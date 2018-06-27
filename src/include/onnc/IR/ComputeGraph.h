@@ -12,8 +12,8 @@
 #include <onnc/Support/MemoryPool.h>
 #include <onnc/IR/ComputeOperator.h>
 #include <onnc/IR/ComputeOperand.h>
-#include <onnc/IR/ComputeAttrOperand.h>
 #include <onnc/IR/ComputeMemOperand.h>
+#include <set>
 
 namespace onnc {
 
@@ -23,6 +23,9 @@ class Module;
  */
 class ComputeGraph
 {
+public:
+  typedef std::unordered_set<ComputeOperand*> ArcList;
+
 public:
   typedef ComputeOperator Node;
   typedef ComputeOperand  Arc;
@@ -43,12 +46,20 @@ public:
                                       ConstTraits<Node> > const_bfs_iterator;
 
 public:
-  ComputeGraph(Module& pModule);
+  ComputeGraph(const std::string& pName, Module& pModule, ArcList& pArcList);
 
   virtual ~ComputeGraph();
 
+  const std::string& name() const { return m_Name; }
+
   template<typename OpType, typename ... NodeCtorParams>
   OpType* addOperator(NodeCtorParams&& ... pParams);
+
+  /// Add an operator in the graph. The added node's life cycle is delegated
+  /// to the graph. ComputeGraph is responsible for destruction of the added
+  /// node.
+  template<typename OpType>
+  ComputeGraph& addOperator(OpType& pOperator);
 
   template<typename OpndType, typename ... ArcCtorParams>
   OpndType* addOperand(Node& pU, Node& pV, ArcCtorParams&& ... pParams);
@@ -76,6 +87,8 @@ public:
 
   unsigned int getNodeSize() const { return m_NodeList.size(); }
 
+  unsigned int getArcSize() const { return m_ArcList.size(); }
+
   iterator begin();
 
   iterator end();
@@ -101,15 +114,18 @@ public:
   const_bfs_iterator bfs_end() const;
 
 private:
-  typedef std::vector<Node*> NodeList;
+  typedef std::unordered_set<Node*> NodeList;
 
 private:
   Module& m_Module;
+  std::string m_Name;
   Node* m_pNodeHead;
   Node* m_pNodeRear;
-  Node* m_pFreeNodeHead; //< list of free nodes
   NodeList m_NodeList;
+  ArcList& m_ArcList;
 };
+
+#include "Bits/ComputeGraph.tcc"
 
 } // namespace of onnc
 
