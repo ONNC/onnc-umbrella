@@ -16,7 +16,8 @@ ONNC Umbrella is the umbrella for all ONNC projects.
 ### Ubuntu - with Apt ###
 
 ```
-apt install git automake libtool protobuf-compiler libprotoc-dev python2.7 python2.7-dev
+apt install git automake libtool protobuf-compiler libprotoc-dev python2.7 python2.7-dev python-pip
+pip install lit
 ```
 
 ### macOS - with Homebrew ###
@@ -120,6 +121,10 @@ pushd build
     make install
 popd
 ```
+
+### Test
+cd build
+make check -j4
 
 ### Coding style
 

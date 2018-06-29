@@ -60,13 +60,11 @@ ENV PATH="${PATH}:/usr/lib/llvm-5.0/bin"
 ENV PATH="${PATH}:/usr/lib/llvm-5.0/share/clang"
 ENV PATH="${PATH}:/usr/share/clang/clang-format-5.0"
 
-RUN pip install protobuf
-
-# for pytorch
 RUN pip install \
-      future \
-      numpy \
-      protobuf
+    future \
+    numpy \
+    protobuf \
+    lit 
 
 RUN pip3 install \
     jinja2
