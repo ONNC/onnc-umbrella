@@ -299,24 +299,8 @@ function build_onnx
   show "making ... #jobs=${MAX_MAKE_JOBS}"
   fail_panic "Make ${NAME} failed." ${MAKE} ${PARALLEL_BUILD_FLAG} all
 
-  # So far, ONNX doesn't provide install rule in CMakeList.txt. Copy
-  # archives to the install directory by our self.
   show "installing ..."
-  rm -rf ${INSTALLDIR}/lib/libonnx.a ${INSTALLDIR}/lib/libonnx_proto.a ${INSTALLDIR}/include/onnx
-  cp ${BUILDDIR}/libonnx.a ${INSTALLDIR}/lib
-  cp ${BUILDDIR}/libonnx_proto.a ${INSTALLDIR}/lib
-  cp -r ${BUILDDIR}/onnx ${INSTALLDIR}/include
-  mkdir ${INSTALLDIR}/include/onnx/optimizer
-  mkdir ${INSTALLDIR}/include/onnx/passes
-  mkdir ${INSTALLDIR}/include/onnx/common
-  mkdir ${INSTALLDIR}/include/onnx/defs
-
-  cp ${SRCDIR}/onnx/*.h           ${INSTALLDIR}/include/onnx/
-  cp ${SRCDIR}/onnx/optimizer/*.h ${INSTALLDIR}/include/onnx/optimizer/
-  cp ${SRCDIR}/onnx/passes/*.h    ${INSTALLDIR}/include/onnx/passes/
-  cp ${SRCDIR}/onnx/common/*.h    ${INSTALLDIR}/include/onnx/common/
-  cp ${SRCDIR}/onnx/defs/*.h      ${INSTALLDIR}/include/onnx/defs/
- 
+  make install 
   show "finishing ..."
   popd > /dev/null
 }
