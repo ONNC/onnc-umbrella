@@ -64,6 +64,7 @@ if (TARGET_TG)
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE_TG}
         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
         -DCHIP=${TARGET_TG_ARCH}
+        -Dgen_asm_proto=ON
         -Dbuild_bmnet=ON)
     add_dependencies(build_external bmtap2)
 endif()
