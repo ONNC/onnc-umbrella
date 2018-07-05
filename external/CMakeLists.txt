@@ -57,7 +57,6 @@ if (TARGET_TG)
         BUILD_BYPRODUCTS
         Install/bmtap2/lib/libbmnet.so
         Install/bmtap2/lib/libbmkernel-static.a
-        Install/bmtap2/lib/libbm_cmodel.so
         Install/bmtap2/lib/libbmutils.so
         Install/bmtap2/lib/libbmruntime.so
         BUILD_ALWAYS ${BUILD_EXT_ALWAYS}
