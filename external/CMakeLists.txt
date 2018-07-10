@@ -6,7 +6,7 @@ include(${ONNC_EXTERNAL_SOURCE_DIR}/../src/cmake/option.cmake)
 include(${ONNC_EXTERNAL_SOURCE_DIR}/../src/cmake/onnc_target.cmake)
 enum_onnc_targets()
 
-option(BUILD_EXT_ALWAYS "always build external project" OFF)
+option(BUILD_EXT_ALWAYS "always build external project" ON)
 
 add_custom_target(build_external)
 set_directory_properties(PROPERTIES EP_BASE ${CMAKE_CURRENT_BINARY_DIR})
@@ -28,7 +28,7 @@ endif()
 # build SkyPat
 ExternalProject_Add(skypat
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/SkyPat
-    BUILD_ALWAYS ${BUILD_EXT_ALWAYS}
+    BUILD_ALWAYS OFF # skypat install does not check timestamp
     BUILD_BYPRODUCTS Install/skypat/lib/libskypat.a # for ninja
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
     BUILD_COMMAND ${MAKE})
