@@ -5,6 +5,3 @@
 [submodule "external/onnx"]
 	path = external/onnx
 	url = ../../bmsky/onnx.git
-[submodule "external/bmtap2"]
-	path = external/bmtap2
-	url = ../../bmsky/bmtap2.git

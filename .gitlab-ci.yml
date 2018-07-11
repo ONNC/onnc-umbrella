@@ -36,9 +36,6 @@ build_separate:
     -   cmake ../src
           -DONNX_INSTALL_DIR=$PWD/../build_external/Install/onnx
           -DSKYPAT_INSTALL_DIR=$PWD/../build_external/Install/skypat
-          -DBMTAP_INSTALL_DIR=$PWD/../build_external/Install/bmtap2
-          -DBMTAP_SOURCE_DIR=$PWD/../external/bmtap2
-          -DBMTAP_BINARY_DIR=$PWD/../build_external/Build/bmtap2
     -   make -j$(nproc)
     -   ctest -j$(nproc)
     - popd
