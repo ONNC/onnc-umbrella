@@ -300,7 +300,8 @@ function build_onnx
   fail_panic "Make ${NAME} failed." ${MAKE} ${PARALLEL_BUILD_FLAG} all
 
   show "installing ..."
-  make install 
+  rm -rf ${INSTALLDIR}/lib/libonnx.a ${INSTALLDIR}/lib/libonnx_proto.a ${INSTALLDIR}/include/onnx
+  fail_panic "Install ${NAME} failed." ${MAKE} install 
   show "finishing ..."
   popd > /dev/null
 }

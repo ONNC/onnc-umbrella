@@ -141,7 +141,7 @@ function build_onnc
                           --with-skypat="${ONNC_EXTDIR}" \
                           --with-onnx="${ONNC_EXTDIR}" \
                           --with-llvm="${ONNC_EXTDIR}" \
-                          --enable-unittest --enable-targets=x86
+                          --enable-unittest --enable-targets=x86,tg
       ;;
     rgn)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
