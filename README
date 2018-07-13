@@ -20,7 +20,7 @@ Prerequisites
 ### macOS - with Homebrew ###
 
     xcode-select --install
-    brew install git autoconf automake libtool pkg-config protobuf
+    brew install git autoconf automake libtool pkg-config protobuf bison flex flex++
 
 Compilation Instructions
 ------------------------
