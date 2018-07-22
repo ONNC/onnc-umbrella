@@ -130,22 +130,19 @@ function build_onnc
   case "${ONNC_MODE}" in
     normal)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
-                          --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-onnx="${ONNC_EXTDIR}" \
                           --with-llvm="${ONNC_EXTDIR}" \
                           --with-skypat="${ONNC_EXTDIR}"
       ;;
     dbg)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
-                          --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --with-onnx="${ONNC_EXTDIR}" \
                           --with-llvm="${ONNC_EXTDIR}" \
-                          --enable-unittest --enable-targets=x86,tg
+                          --enable-unittest
       ;;
     rgn)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
-                          --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-onnx="${ONNC_EXTDIR}" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --with-llvm="${ONNC_EXTDIR}" \
@@ -155,7 +152,6 @@ function build_onnc
       ;;
     opt)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
-                          --with-bmkernel="${ONNC_EXTDIR}/../external/install" \
                           --with-onnx="${ONNC_EXTDIR}/../external/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --with-llvm="${ONNC_EXTDIR}" \
