@@ -33,6 +33,8 @@ public:
 public:
   QuantizePass(BM1880Backend *pBackend);
 
+  StringRef getPassName() const override { return "Quantize"; }
+  
   Pass::ReturnType runOnModule(Module &pModule) override;
 
 private:
@@ -42,7 +44,7 @@ private:
 
   void updateElementType(const std::vector<MemOperand *> &pMemOprds);
 
-  void updateQuantizeWeight(onnx::Graph *pGraph);
+  void updateQuantizeWeight(::onnx::Graph *pGraph);
 
   void TLConv(std::unique_ptr<ComputeOperator2> &pInst);
   void Conv(std::unique_ptr<ComputeOperator2> &pInst);
