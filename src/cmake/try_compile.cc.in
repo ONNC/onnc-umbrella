@@ -1,7 +1,0 @@
-@OPT_HEAD@
-int main ()
-{
-    @OPT_CODE@;
-    return 0;
-}
-

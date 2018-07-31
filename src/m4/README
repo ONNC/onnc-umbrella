@@ -1,3 +1,0 @@
-Scripts under m4 folder are functions for autoconf.
-Scripts under m4/targets are used to make function calls for different target
-backends.
