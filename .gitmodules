@@ -5,3 +5,6 @@
 [submodule "external/onnx"]
 	path = external/onnx
 	url = ../../bmsky/onnx.git
+[submodule "src"]
+	path = src
+	url = git@github.com:ONNC/onnc.git
