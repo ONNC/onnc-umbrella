@@ -4,7 +4,7 @@
     ignore = dirty # skypat does not support out-of-source build
 [submodule "external/onnx"]
 	path = external/onnx
-	url = ../../bmsky/onnx.git
+	url = https://github.com/onnx/onnx.git
 [submodule "src"]
 	path = src
 	url = git@github.com:ONNC/onnc.git
