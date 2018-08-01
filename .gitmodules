@@ -7,4 +7,4 @@
 	url = https://github.com/onnx/onnx.git
 [submodule "src"]
 	path = src
-	url = git@github.com:ONNC/onnc.git
+	url = https://github.com/ONNC/onnc.git
