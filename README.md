@@ -1,5 +1,3 @@
-[![coverage report](https://git-bitmain.skymizer.com/bmsky/onnc/badges/master/coverage.svg)](https://git-bitmain.skymizer.com/bmsky/onnc/commits/master)
-
 # ONNC Umbrella
 
 ## Introduction
@@ -35,10 +33,10 @@ Dance with `build.sh` script.
 1. Check out ONNC from the repository.
 
     ```
-    git clone --recursive ssh://git@git-bitmain.skymizer.com:6824/bmsky/onnc.git ${ONNC}
+    git clone --recursive https://github.com/ONNC/onnc-umbrella.git ${ONNC}
     ```
 
-2. Type `cd ${ONNC}' to the directory containing the source code.
+2. Type `cd ${ONNC}` to the directory containing the source code.
 
 3. Use `build.sh` to compile the package.
 
@@ -56,7 +54,10 @@ For example, use `./build.sh dbg /opt/onnc` to build the latest
 revision in debug mode for installation at `/opt/onnc`.
 
 It will build in `build-dbg`, install to `install-dbg`, and
-generate a binary package named `onnc-<branch name>.tar.gz`. You can use
+generate a binary package named `onnc-<branch name>.tar.gz`.
+
+## Deployment Instructions
+You can use the following instruction to install the binary package.
 
 ```
 tar zxf onnc-master.tar.gz -C /opt
@@ -69,10 +70,8 @@ mkdir /opt/onnc
 tar zxf onnc-master.tar.gz --strip-components 1 -C /opt/onnc
 ```
 
-to extract the binary package at the target folder.
-
 Recompile with the same arguments `./build.sh dbg /opt/onnc`, or
-make with DESTDIR=./install-dbg to ensure the binaries are installed
+make with `DESTDIR=./install-dbg` to ensure the binaries are installed
 to the staged installation path instead of being installed directly to the
 target folder `/opt/onnc`.
 
@@ -105,42 +104,21 @@ The package is configured to be installed at the target folder (PREFIX).
 * src       - The source directory of onnc project
 * external  - The external librarys
 
-## Compilation Instructions (CMake)
+## Compilation Instructions (CMake, experimental)
+We also provide `build.cmake.sh` for people love cmake. Currently, this script
+is experimental. It only pass deployment test on ubuntu Linux environment.
 
-### Enviroment setup
-
-see **Workflow 2 with CMake** in docker/README.md
-
-### Build
-
-```
-mkdir -p build
-pushd build
-    cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/install
-    make -j4
-    make install
-popd
-```
-
-### Test
-cd build
-make check -j4
-
-### Coding style
-
-  * clang-format
-    1. install Vundle in vim
-    2. add vim-autoformat in vimrc
-
-        ```
-        Plugin 'Chiel92/vim-autoformat'
-        map <silent>  <F3> :Autoformat<CR>
-        let g:formatters_cpp = ['clangformat', 'fail']
-        ```
-
-  * clang-tidy
+1. Check out ONNC from the repository with `--recursive` flag
 
     ```
-    cd onnc
-    run-clang-tidy-5.0.py src -p build
-    ``` 
+    git clone --recursive https://github.com/ONNC/onnc-umbrella.git ${ONNC}
+    ```
+
+2. Type `cd ${ONNC}` to the directory containing the source code.
+
+3. Use `build.cmake.sh` to configure the package.
+    ```
+    ./build.cmake.sh
+    ```
+
+The script creates `build` folder as a workspace.
