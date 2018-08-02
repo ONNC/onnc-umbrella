@@ -111,7 +111,6 @@ function build_external
 
   fail_panic "directory not found: ${ONNC_EXTSRCDIR}" test -d "${ONNC_EXTSRCDIR}"
 
-  build_bmtap2   "${ONNC_EXTSRCDIR}/bmtap2"  "${ONNC_EXTDIR}"
   build_skypat  "${ONNC_EXTSRCDIR}/SkyPat"   "${ONNC_EXTDIR}"
   build_llvm    "${ONNC_EXTSRCDIR}/llvm"     "${ONNC_EXTDIR}"
   build_onnx    "${ONNC_EXTSRCDIR}/onnx"     "${ONNC_EXTDIR}"

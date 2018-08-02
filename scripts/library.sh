@@ -305,25 +305,3 @@ function build_onnx
   show "finishing ..."
   popd > /dev/null
 }
-
-function build_bmtap2
-{
-  local SRCDIR=$1
-  local NAME=$(basename "${SRCDIR}")
-  local EXTDIR=$(dirname "${SRCDIR}")
-  local BUILDDIR=$(getabs "build-${NAME}")
-  local INSTALLDIR=$2
-
-  shift; shift
-
-  if [ ! -d "${BUILDDIR}" ]; then
-    show "create build directory at '${BUILDDIR}'"
-    mkdir -p "${BUILDDIR}"
-  fi
-
-  show "building ${NAME} src=${SRCDIR} build=${BUILDDIR} install=${INSTALLDIR} ..."
-  pushd ${BUILDDIR}
-  cmake ${SRCDIR}
-  make all install
-  popd
-}
