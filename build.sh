@@ -55,6 +55,9 @@ function setup_environment
     usage_exit "$@"
   fi
 
+  # check out the submodules if we forget to use --recursive when cloning.
+  git submodule update --init --recursive
+
   # root to the source & external source folder
   export ONNC_SRCDIR=$(getabs "src")
   export ONNC_EXTSRCDIR=$(getabs "external")
