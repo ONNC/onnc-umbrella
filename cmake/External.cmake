@@ -1,0 +1,30 @@
+include(ExternalProject)
+set(ONNC_UMBRELLA_EXTERNAL_PATH ${ONNC_UMBRELLA_PATH}/external)
+
+####################
+# onnx
+
+find_package(onnx)
+if(EXTERNAL_BUILD_ALWAYS OR ONNX_SOURCE_DIR OR NOT ONNX_INCLUDE_DIR OR NOT ONNX_LIBRARIES)
+    if(NOT ONNX_SOURCE_DIR)
+        set(ONNX_SOURCE_DIR ${ONNC_UMBRELLA_EXTERNAL_PATH}/onnx CACHE PATH "onnx source path")
+    endif(NOT ONNX_SOURCE_DIR)
+    # Build & install onnx
+    ExternalProject_Add(Ext_project_onnx
+        PREFIX onnx
+        DOWNLOAD_COMMAND git submodule update --recursive ${ONNC_UMBRELLA_EXTERNAL_PATH}/onnx
+        SOURCE_DIR ${ONNX_SOURCE_DIR}
+        CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        BUILD_ALWAYS ${EXTERNAL_BUILD_ALWAYS}
+        BUILD_IN_SOURCE ${EXTERNAL_BUILD_IN_SOURCE}
+    )
+    # Set include directory
+    if(NOT ONNX_INCLUDE_DIR)
+        set(ONNX_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
+    endif(NOT ONNX_INCLUDE_DIR)
+    # Set lib directory
+    if(NOT ONNX_LIBRARIES)
+        set(ONNX_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib)
+    endif(NOT ONNX_LIBRARIES)
+endif(EXTERNAL_BUILD_ALWAYS OR ONNX_SOURCE_DIR OR NOT ONNX_INCLUDE_DIR OR NOT ONNX_LIBRARIES)
+
