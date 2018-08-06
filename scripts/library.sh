@@ -268,13 +268,11 @@ function build_llvm
 
 function build_onnx
 {
-  local ONNX_VERSION="ff7b3b4c"
   local SRCDIR=$1
   local NAME=$(basename "${SRCDIR}")
   local BUILDDIR=$(getabs "build-${NAME}")
   local INSTALLDIR=$2
-
-  shift; shift
+  local NAMESPACE=$3
 
   show "building ${NAME} ..."
 
@@ -291,7 +289,7 @@ function build_onnx
     cmake \
     "-DCMAKE_BUILD_TYPE=Release" \
     "-DCMAKE_INSTALL_PREFIX=${INSTALLDIR}" \
-    "-DONNX_NAMESPACE=onnx" \
+    "-DONNX_NAMESPACE=${NAMESPACE}" \
     "${SRCDIR}"
 
   local MAX_MAKE_JOBS=${MAX_MAKE_JOBS-2}

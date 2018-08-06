@@ -97,6 +97,9 @@ function setup_environment
     rm -rf "${ONNC_TARBALL}"
   fi
 
+  # define ONNX namespace
+  export ONNC_ONNX_NAMESPACE="onnx"
+
   # detect MAKE for specific platforms
   export MAKE=${MAKE:-make}
   case "$(platform)" in
@@ -117,12 +120,12 @@ function build_external
 
   build_skypat  "${ONNC_EXTSRCDIR}/SkyPat"   "${ONNC_EXTDIR}"
   build_llvm    "${ONNC_EXTSRCDIR}/llvm"     "${ONNC_EXTDIR}"
-  build_onnx    "${ONNC_EXTSRCDIR}/onnx"     "${ONNC_EXTDIR}"
+  build_onnx    "${ONNC_EXTSRCDIR}/onnx"     "${ONNC_EXTDIR}" "${ONNC_ONNX_NAMESPACE}"
 }
 
 function build_onnc
 {
-  show "building onnc..."
+  show "building onnc...${ONNC_ONNX_NAMESPACE}"
 
   fail_panic "directory not found: ${ONNC_SRCDIR}" test -d "${ONNC_SRCDIR}"
 
@@ -138,13 +141,15 @@ function build_onnc
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-onnx="${ONNC_EXTDIR}" \
                           --with-llvm="${ONNC_EXTDIR}" \
-                          --with-skypat="${ONNC_EXTDIR}"
+                          --with-skypat="${ONNC_EXTDIR}" \
+                          --with-onnx-namespace="${ONNC_ONNX_NAMESPACE}"
       ;;
     dbg)
       fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --with-onnx="${ONNC_EXTDIR}" \
                           --with-llvm="${ONNC_EXTDIR}" \
+                          --with-onnx-namespace="${ONNC_ONNX_NAMESPACE}" \
                           --enable-unittest
       ;;
     rgn)
@@ -152,6 +157,7 @@ function build_onnc
                           --with-onnx="${ONNC_EXTDIR}" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --with-llvm="${ONNC_EXTDIR}" \
+                          --with-onnx-namespace="${ONNC_ONNX_NAMESPACE}" \
                           --enable-debug \
                           --enable-unittest \
                           --enable-regression
@@ -161,6 +167,7 @@ function build_onnc
                           --with-onnx="${ONNC_EXTDIR}/../external/install" \
                           --with-skypat="${ONNC_EXTDIR}" \
                           --with-llvm="${ONNC_EXTDIR}" \
+                          --with-onnx-namespace="${ONNC_ONNX_NAMESPACE}" \
                           --enable-optimize
       ;;
     *)
