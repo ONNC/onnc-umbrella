@@ -7,3 +7,4 @@ GPATH
 GRTAGS
 GTAGS
 __pycache__
+external/llvm*

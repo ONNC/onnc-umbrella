@@ -70,3 +70,38 @@ if(BUILD_EXTERNAL OR SKYPAT_SOURCE_DIR OR NOT SKYPAT_INCLUDE_DIR OR NOT SKYPAT_L
     set(SKYPAT_LIBRARY_DIR ${EXTERNAL_INSTALL_PREFIX}/lib)
     message(STATUS "Using SkyPat library directory at ${SKYPAT_LIBRARY_DIR}")
 endif(BUILD_EXTERNAL OR SKYPAT_SOURCE_DIR OR NOT SKYPAT_INCLUDE_DIR OR NOT SKYPAT_LIBRARY_DIR)
+
+####################
+# llvm
+find_package(llvm)
+OPTION(BUILD_LLVM "Build llvm" ON)
+set(BUILD_LLVM_VERSION "5.0.1" CACHE STRING "llvm version")
+set(LLVM_LIBRARY_DIR ${LLVM_LIBRARY_DIRS})
+if((BUILD_EXTERNAL AND BUILD_LLVM) OR NOT LLVM_INCLUDE_DIR OR NOT LLVM_LIBRARY_DIR)
+    if(NOT LLVM_SOURCE_DIR)
+        set(LLVM_SOURCE_DIR ${ONNC_UMBRELLA_EXTERNAL_PATH}/llvm CACHE PATH "llvm source path")
+    endif(NOT LLVM_SOURCE_DIR)
+    message(STATUS "Using llvm source at ${LLVM_SOURCE_DIR}")
+    # Build & install llvm
+    ExternalProject_Add(Ext_project_llvm
+        PREFIX llvm
+        DOWNLOAD_DIR ${ONNC_UMBRELLA_EXTERNAL_PATH}
+        URL https://releases.llvm.org/${BUILD_LLVM_VERSION}/llvm-${BUILD_LLVM_VERSION}.src.tar.xz
+        SOURCE_DIR ${LLVM_SOURCE_DIR}
+        BUILD_ALWAYS ${BUILD_EXTERNAL}
+        BUILD_IN_SOURCE ${EXTERNAL_BUILD_IN_SOURCE}
+        CMAKE_ARGS 
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE_LLVM}
+            -DCMAKE_INSTALL_PREFIX=${EXTERNAL_INSTALL_PREFIX}
+            -DLLVM_TARGETS_TO_BUILD=host;X86;ARM;AArch64
+    )
+    # Set include directory
+    set(LLVM_INCLUDE_DIR ${EXTERNAL_INSTALL_PREFIX}/include)
+    message(STATUS "Using llvm include directory at ${LLVM_INCLUDE_DIR}")
+    # Set lib directory
+    set(LLVM_LIBRARY_DIR ${EXTERNAL_INSTALL_PREFIX}/lib)
+    message(STATUS "Using llvm library directory at ${LLVM_LIBRARY_DIR}")
+    # Set llvm directory
+    set(llvm_DIR ${EXTERNAL_INSTALL_PREFIX}/lib/cmake/llvm)
+    message(STATUS "Using llvm at ${llvm_DIR}")
+endif((BUILD_EXTERNAL AND BUILD_LLVM) OR NOT LLVM_INCLUDE_DIR OR NOT LLVM_LIBRARY_DIR)
