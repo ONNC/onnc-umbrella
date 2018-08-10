@@ -10,11 +10,13 @@ ONNC Umbrella is the umbrella for all ONNC projects.
   3. GNU Libtool
   4. pkg-config
   5. Protocol Buffer
+  6. boost
+  7. glog
 
 ### Ubuntu - with Apt ###
 
 ```
-apt install git automake libtool protobuf-compiler libprotoc-dev python2.7 python2.7-dev python-pip
+apt install git automake libtool protobuf-compiler libprotoc-dev python2.7 python2.7-dev python-pip libgoogle-glog-dev libboost-filesystem-dev
 pip install lit
 ```
 
