@@ -12,6 +12,8 @@ ONNC Umbrella is the umbrella for all ONNC projects.
   5. Protocol Buffer
   6. boost
   7. glog
+  8. flex
+  9. bison
 
 ### Ubuntu - with Apt ###
 
