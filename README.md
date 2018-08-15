@@ -10,6 +10,8 @@ ONNC Umbrella is the umbrella for all ONNC projects.
   3. GNU Libtool
   4. pkg-config
   5. Protocol Buffer
+  6. flex
+  7. bison
 
 ### Ubuntu - with Apt ###
 
