@@ -26,7 +26,7 @@ pip install lit
 
 ```
 xcode-select --install
-brew install git autoconf automake libtool pkg-config protobuf
+brew install git autoconf automake libtool pkg-config protobuf coreutils
 ```
 
 ## Compilation Instructions
