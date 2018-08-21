@@ -1,0 +1,39 @@
+version: 2.0
+jobs:
+  "ubuntu-latest-build":
+    docker:
+      - image: ubuntu:latest
+    steps:
+      - run:
+          name: "Install CircleCI prerequisite"
+          command:
+            apt-get update && apt-get install -y git ssh tar gzip ca-certificates
+      - checkout
+      - run:
+          name: "Install prerequisite"
+          command: 
+            apt-get install -y gcc g++ cmake curl automake libtool protobuf-compiler libprotoc-dev pkg-config python2.7 python2.7-dev python-pip libgoogle-glog-dev libboost-filesystem-dev flex bison
+      - restore_cache:
+          keys:
+            - ubuntu-latest-external
+      - run:
+          name: "Update git submodule"
+          command: 
+            git submodule init && git submodule update
+      - run:
+          name: "Build"
+          command: 
+            mkdir install && ./build.sh normal ./install
+      - save_cache:
+          key: ubuntu-latest-external
+          paths:
+            - "build-llvm"
+            - "build-onnx"
+            - "build-SkyPat"
+workflows:
+  version: 2
+  build:
+    jobs:
+      - "ubuntu-latest-build"
+      
+      
