@@ -32,7 +32,14 @@ jobs:
             - "build-SkyPat"
 workflows:
   version: 2
-  build:
+  nightly:
+      triggers:
+        - schedule:
+            cron: "19 12 * * *"
+            filters:
+              branches:
+                only:
+                  - master
     jobs:
       - "ubuntu-latest-build"
       
