@@ -33,13 +33,13 @@ jobs:
 workflows:
   version: 2
   nightly:
-      triggers:
-        - schedule:
-            cron: "19 12 * * *"
-            filters:
-              branches:
-                only:
-                  - master
+    triggers:
+      - schedule:
+          cron: "22 12 * * *"
+          filters:
+            branches:
+              only:
+                - master
     jobs:
       - "ubuntu-latest-build"
       
