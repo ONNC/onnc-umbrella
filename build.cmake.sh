@@ -192,6 +192,32 @@ function build_onnc
   popd > /dev/null
 }
 
+function build_tools
+{
+  show "building onnc-umbrella tools..."
+
+  local ONNC_UMBRELLA_BUILDDIR=${ONNC_BUILDDIR}/umbrella
+  local ONNC_UMBRELLA_SOURCEDIR=${PWD}
+
+  show "create build directory at '${ONNC_UMBRELLA_BUILDDIR}/tools'"
+  mkdir -p ${ONNC_UMBRELLA_BUILDDIR}/tools
+
+  pushd "${ONNC_UMBRELLA_BUILDDIR}/tools" > /dev/null
+    local TOOLS_SRC_DIR=${ONNC_UMBRELLA_SOURCEDIR}/tools
+    for TOOL in `ls ${TOOLS_SRC_DIR}`; do
+      if [ -f ${TOOLS_SRC_DIR}/$TOOL/Makefile ] || [ -f ${TOOLS_SRC_DIR}/$TOOL/makefile ] ; then
+        show "building tools: '$TOOL'"
+        mkdir -p $TOOL
+        make -C ${TOOLS_SRC_DIR}/$TOOL \
+          BUILD_DIR=${PWD}/$TOOL \
+          INSTALL_DIR=${ONNC_DESTDIR}${ONNC_PREFIX} \
+          EXTERNAL_DIR=${ONNC_EXTDIR} \
+          install
+      fi
+    done
+  popd > /dev/null
+}
+
 ##===----------------------------------------------------------------------===##
 # Packaging functions
 ##===----------------------------------------------------------------------===##
@@ -240,7 +266,7 @@ fi
 # Parse arguments and setup environment
 setup_environment "$@"
 
-# Build external libraries and libonnc
+# Build external libraries, libonnc and tools
 if [ "${BUILD_EXTERNAL}" != "false" ]; then
   build_external
   if [ "${EXTERNAL_ONLY}" = "true" ]; then
@@ -248,6 +274,7 @@ if [ "${BUILD_EXTERNAL}" != "false" ]; then
   fi
 fi
 build_onnc
+build_tools
 
 # Package the installer
 package_tarball
