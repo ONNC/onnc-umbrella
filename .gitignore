@@ -1,9 +1,9 @@
 build
 build-*
 install-*
-docker/*.log
 onncroot
 GPATH
 GRTAGS
 GTAGS
 __pycache__
+external/llvm
