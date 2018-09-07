@@ -134,7 +134,7 @@ function build_onnc
     normal)
       fail_panic "CMake onnc failed." cmake -DCMAKE_BUILD_TYPE=Release \
                           -DCMAKE_INSTALL_PREFIX="${ONNC_PREFIX}" \
-                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}" \
+                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}/lib/cmake/llvm" \
                           -DONNX_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
                           -DONNX_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
                           -DONNX_NAMESPACE=onnx \
@@ -145,7 +145,7 @@ function build_onnc
     dbg)
       fail_panic "CMake onnc failed." cmake -DCMAKE_BUILD_TYPE=Debug \
                           -DCMAKE_INSTALL_PREFIX="${ONNC_PREFIX}" \
-                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}" \
+                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}/lib/cmake/llvm" \
                           -DONNX_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
                           -DONNX_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
                           -DONNX_NAMESPACE=onnx \
@@ -156,7 +156,7 @@ function build_onnc
     rgn)
       fail_panic "CMake onnc failed." cmake -DCMAKE_BUILD_TYPE=Regression \
                           -DCMAKE_INSTALL_PREFIX="${ONNC_PREFIX}" \
-                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}" \
+                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}/lib/cmake/llvm" \
                           -DONNX_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
                           -DONNX_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
                           -DONNX_NAMESPACE=onnx \
@@ -167,7 +167,7 @@ function build_onnc
     opt)
       fail_panic "CMake onnc failed." cmake -DCMAKE_BUILD_TYPE=Optimized \
                           -DCMAKE_INSTALL_PREFIX="${ONNC_PREFIX}" \
-                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}" \
+                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}/lib/cmake/llvm" \
                           -DONNX_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
                           -DONNX_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
                           -DONNX_NAMESPACE=onnx \
