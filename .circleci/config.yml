@@ -76,20 +76,12 @@ workflows:
 
   ci-config-test:
     jobs:
-      - "build-automake":
-          type: approval
-      - "build-cmake":
-          type: approval
       - "ubuntu-latest-build":
-          requires:
-            - "build-automake"
           filters:
             branches:
               only:
                 - ci
       - "ubuntu-latest-build-cmake":
-          requires:
-            - "build-cmake"
           filters:
             branches:
               only:

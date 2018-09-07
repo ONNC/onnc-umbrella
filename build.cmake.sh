@@ -134,45 +134,37 @@ function build_onnc
     normal)
       fail_panic "CMake onnc failed." cmake -DCMAKE_BUILD_TYPE=Release \
                           -DCMAKE_INSTALL_PREFIX="${ONNC_PREFIX}" \
-                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}/lib/cmake/llvm" \
-                          -DONNX_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
-                          -DONNX_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
+                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}" \
+                          -DONNX_ROOT="${ONNC_EXTDIR}" \
                           -DONNX_NAMESPACE=onnx \
-                          -DSKYPAT_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
-                          -DSKYPAT_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
+                          -DSKYPAT_ROOT="${ONNC_EXTDIR}" \
                           ${ONNC_SRCDIR}
       ;;
     dbg)
       fail_panic "CMake onnc failed." cmake -DCMAKE_BUILD_TYPE=Debug \
                           -DCMAKE_INSTALL_PREFIX="${ONNC_PREFIX}" \
-                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}/lib/cmake/llvm" \
-                          -DONNX_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
-                          -DONNX_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
+                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}" \
+                          -DONNX_ROOT="${ONNC_EXTDIR}" \
                           -DONNX_NAMESPACE=onnx \
-                          -DSKYPAT_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
-                          -DSKYPAT_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
+                          -DSKYPAT_ROOT="${ONNC_EXTDIR}" \
                           ${ONNC_SRCDIR}
       ;;
     rgn)
       fail_panic "CMake onnc failed." cmake -DCMAKE_BUILD_TYPE=Regression \
                           -DCMAKE_INSTALL_PREFIX="${ONNC_PREFIX}" \
-                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}/lib/cmake/llvm" \
-                          -DONNX_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
-                          -DONNX_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
+                          -DLLVM_ROOT_DIR="${ONNC_EXTDIR}" \
+                          -DONNX_ROOT="${ONNC_EXTDIR}" \
                           -DONNX_NAMESPACE=onnx \
-                          -DSKYPAT_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
-                          -DSKYPAT_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
+                          -DSKYPAT_ROOT="${ONNC_EXTDIR}" \
                           ${ONNC_SRCDIR}
       ;;
     opt)
       fail_panic "CMake onnc failed." cmake -DCMAKE_BUILD_TYPE=Optimized \
                           -DCMAKE_INSTALL_PREFIX="${ONNC_PREFIX}" \
                           -DLLVM_ROOT_DIR="${ONNC_EXTDIR}/lib/cmake/llvm" \
-                          -DONNX_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
-                          -DONNX_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
+                          -DONNX_ROOT="${ONNC_EXTDIR}" \
                           -DONNX_NAMESPACE=onnx \
-                          -DSKYPAT_INCLUDE_DIR="${ONNC_EXTDIR}/include" \
-                          -DSKYPAT_LIBRARY_DIR="${ONNC_EXTDIR}/lib" \
+                          -DSKYPAT_ROOT="${ONNC_EXTDIR}" \
                           ${ONNC_SRCDIR}
       ;;
     *)
