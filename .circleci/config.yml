@@ -30,17 +30,48 @@ jobs:
             - "build-llvm"
             - "build-onnx"
             - "build-SkyPat"
+  "ubuntu-latest-build-cmake":
+    docker:
+      - image: ubuntu:latest
+    steps:
+      - run:
+          name: "Install CircleCI prerequisite"
+          command:
+            apt-get update && apt-get install -y git ssh tar gzip ca-certificates
+      - checkout
+      - run:
+          name: "Install prerequisite"
+          command: 
+            apt-get install -y gcc g++ cmake curl automake libtool protobuf-compiler libprotoc-dev pkg-config python2.7 python2.7-dev python-pip libgoogle-glog-dev libboost-filesystem-dev flex bison
+      - restore_cache:
+          keys:
+            - ubuntu-latest-external
+      - run:
+          name: "Update git submodule"
+          command: 
+            git submodule init && git submodule update
+      - run:
+          name: "Build"
+          command: 
+            mkdir install && ./build.cmake.sh normal ./install
+      - save_cache:
+          key: ubuntu-latest-external
+          paths:
+            - "build-llvm"
+            - "build-onnx"
+            - "build-SkyPat"
 workflows:
   version: 2
   nightly:
     triggers:
       - schedule:
-          cron: "22 12 * * *"
+          cron: "52 4 * * *"
           filters:
             branches:
               only:
                 - master
+                - ci
     jobs:
       - "ubuntu-latest-build"
-      
+      - "ubuntu-latest-build-cmake"
       
