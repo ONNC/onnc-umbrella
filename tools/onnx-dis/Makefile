@@ -10,7 +10,7 @@ EXEC = onnx-dis
 all: $(BUILD_DIR)/$(EXEC)
 
 $(BUILD_DIR)/$(EXEC) : main.cpp
-	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/$(EXEC) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -L, $(LIBRARY_DIRS)) $(LFLAGS) $<
+	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/$(EXEC) $(addprefix -I, $(INCLUDE_DIRS)) $(addprefix -L, $(LIBRARY_DIRS)) $< $(LFLAGS)
 
 install: $(BUILD_DIR)/$(EXEC)
 	cp $(BUILD_DIR)/$(EXEC) $(INSTALL_DIR)/bin/$(EXEC)
