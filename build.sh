@@ -205,7 +205,7 @@ function build_tools
         mkdir -p $TOOL
         make -C ${TOOLS_SRC_DIR}/$TOOL \
           BUILD_DIR=${PWD}/$TOOL \
-          INSTALL_DIR=${ONNC_DESTDIR}${ONNC_PREFIX} \
+          INSTALL_DIR=${ONNC_DESTDIR} \
           EXTERNAL_DIR=${ONNC_EXTDIR} \
           install
       fi
