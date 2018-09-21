@@ -40,4 +40,4 @@ RUN MAX_MAKE_JOBS=8 \
 COPY --chown=onnc:onnc ./ /home/onnc/onnc-umbrella/
 RUN MAX_MAKE_JOBS=8 \
     BUILD_EXTERNAL=false \
-    ./build.cmake.sh dbg install-onnc
+    ./build.cmake.sh dbg

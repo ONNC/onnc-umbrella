@@ -78,6 +78,11 @@ function build_tools
   local ONNC_UMBRELLA_BUILDDIR=${ONNC_BUILDDIR}/umbrella
   local ONNC_UMBRELLA_SOURCEDIR=${PWD}
 
+  local INSTALLDIR=${ONNC_DESTDIR}
+  if [ "${IS_PREFIX_GIVEN}" = "true" ]; then
+    INSTALLDIR=${INSTALLDIR}${ONNC_PREFIX}
+  fi
+
   show "create build directory at '${ONNC_UMBRELLA_BUILDDIR}/tools'"
   mkdir -p ${ONNC_UMBRELLA_BUILDDIR}/tools
 
@@ -89,7 +94,7 @@ function build_tools
         mkdir -p $TOOL
         make -C ${TOOLS_SRC_DIR}/$TOOL \
           BUILD_DIR=${PWD}/$TOOL \
-          INSTALL_DIR=${ONNC_DESTDIR}${ONNC_PREFIX} \
+          INSTALL_DIR=${INSTALLDIR} \
           EXTERNAL_DIR=${ONNC_EXTDIR} \
           install
       fi

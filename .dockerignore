@@ -6,5 +6,6 @@ external/**/.git
 !build.sh
 !build.cmake.sh
 !test
+!tools
 !.git/HEAD
 **/*.swp
