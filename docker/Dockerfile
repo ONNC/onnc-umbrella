@@ -1,5 +1,8 @@
 FROM ubuntu:18.04
 
+ARG THREAD=8
+ARG MODE=normal
+
 RUN groupadd --gid 1000 onnc \
     && useradd --uid 1000 --gid onnc --shell /bin/bash --create-home onnc \
     && mkdir -p /etc/sudoers.d \
@@ -32,12 +35,14 @@ COPY --chown=onnc:onnc ./build.* /home/onnc/onnc-umbrella/
 RUN mkdir -p /home/onnc/onnc-umbrella/src
 RUN sed -i 's/^  build_llvm/  #build_llvm/' scripts/library.sh \
     && sed -i 's/LLVM_ROOT_DIR="\${ONNC_EXTDIR}"/LLVM_ROOT_DIR="\/lib"/' build.cmake.sh
-RUN MAX_MAKE_JOBS=8 \
+RUN MAX_MAKE_JOBS=${THREAD} \
     EXTERNAL_ONLY=true \
-    ./build.cmake.sh dbg install-onnc
+    ./build.cmake.sh
 
 
 COPY --chown=onnc:onnc ./ /home/onnc/onnc-umbrella/
-RUN MAX_MAKE_JOBS=8 \
+RUN MAX_MAKE_JOBS=${THREAD} \
     BUILD_EXTERNAL=false \
-    ./build.cmake.sh dbg
+    ./build.cmake.sh ${MODE}
+
+ENV PATH="/home/onnc/onnc-umbrella/install-${MODE}/bin:${PATH}"
