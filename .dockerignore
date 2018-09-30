@@ -1,7 +1,7 @@
 *
 !src
 !external
-external/**/.git
+**/.git
 !scripts
 !build.sh
 !build.cmake.sh
