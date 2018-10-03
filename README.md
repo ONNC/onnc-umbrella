@@ -108,7 +108,8 @@ The package is configured to be installed at the target folder (PREFIX).
 * src       - The source directory of onnc project
 * external  - The external librarys
 
-## Compilation Instructions (CMake, experimental)
+## Compilation Instructions (CMake)
+
 We also provide `build.cmake.sh` for people love cmake. Currently, this script
 is experimental. It only pass deployment test on ubuntu Linux environment.
 
@@ -120,9 +121,9 @@ is experimental. It only pass deployment test on ubuntu Linux environment.
 
 2. Type `cd ${ONNC}` to the directory containing the source code.
 
-3. Use `build.cmake.sh` to configure the package.
+3. Use `build.cmake.sh` to compile the package.
     ```
-    ./build.cmake.sh
+    ./build.cmake.sh [mode] [target folder]
     ```
 
-The script creates `build` folder as a workspace.
+The behavior of this script is as same as `./build.sh`, but driven with CMake instead of automake.
