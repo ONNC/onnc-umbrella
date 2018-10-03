@@ -1,12 +1,12 @@
 *
 !src
 !external
-**/.git
 !scripts
 !build.sh
 !build.cmake.sh
 !test
 !tools
+!docker/in-container
+**/.git
 !.git/HEAD
 **/*.swp
-!docker/in-container

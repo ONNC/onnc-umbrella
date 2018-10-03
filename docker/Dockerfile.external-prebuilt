@@ -13,7 +13,7 @@ RUN sed -i 's/archive.ubuntu.com/debian.linux.org.tw/' /etc/apt/sources.list \
         sudo \
         gcc g++ git cmake automake libtool protobuf-compiler libprotoc-dev pkg-config python2.7 python2.7-dev python-pip libgoogle-glog-dev flex bison curl \
         libllvm5.0 llvm-5.0 llvm-5.0-dev llvm-5.0-doc llvm-5.0-examples llvm-5.0-runtime llvm-5.0-tools \
-        rsync \
+        rsync time \
     && rm -rf /var/lib/apt/lists/*
 
 USER onnc
@@ -29,6 +29,8 @@ RUN sudo chown onnc:onnc /onnc/onnc-umbrella
 COPY --chown=onnc:onnc ./external ./external/
 COPY --chown=onnc:onnc ./scripts ./scripts/
 COPY --chown=onnc:onnc ./build.* ./
+
+RUN mkdir -p ./src
 
 ARG THREAD=8
 
