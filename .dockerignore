@@ -9,3 +9,4 @@
 !tools
 !.git/HEAD
 **/*.swp
+!docker/in-container

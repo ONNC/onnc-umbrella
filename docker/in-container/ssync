@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#                       The ONNC Project
+
+set -ex
+
+rsync \
+  --verbose \
+  --checksum \
+  --recursive \
+  --links \
+  --inplace \
+  --executability \
+  --chown=onnc:onnc \
+  --exclude=".git" \
+  $HOME/onnc/ $HOME/onnc-umbrella/src/

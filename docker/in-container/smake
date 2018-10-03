@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#                       The ONNC Project
+
+set -ex
+
+ssync
+
+make "$@"
