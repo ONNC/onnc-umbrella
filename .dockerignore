@@ -1,7 +1,11 @@
 *
 !src
 !external
+**/.git
 !scripts
 !build.sh
+!build.cmake.sh
+!test
+!tools
 !.git/HEAD
 **/*.swp
