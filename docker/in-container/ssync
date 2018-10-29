@@ -12,4 +12,5 @@ rsync \
   --executability \
   --chown=onnc:onnc \
   --exclude=".git" \
+  --delete \
   $HOME/onnc/ $HOME/onnc-umbrella/src/
