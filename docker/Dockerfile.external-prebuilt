@@ -29,7 +29,7 @@ COPY --chown=onnc:onnc ./external /onnc/onnc-umbrella/external/
 COPY --chown=onnc:onnc ./scripts /onnc/onnc-umbrella/scripts/
 COPY --chown=onnc:onnc ./build.* /onnc/onnc-umbrella/
 
-ARG THREAD=8
+ARG THREAD=4
 
 RUN MAX_MAKE_JOBS=${THREAD} \
     EXTERNAL_ONLY=true \
