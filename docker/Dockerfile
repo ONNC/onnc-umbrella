@@ -1,4 +1,4 @@
-FROM onnc/onnc:external-prebuilt
+FROM onnc/onnc-dev-external-prebuilt
 
 COPY --chown=onnc:onnc ./ ./
 
