@@ -7,3 +7,5 @@ docker build -t onnc/onnc-dev-external-prebuilt -f docker/Dockerfile.external-pr
 
 docker build -t onnc/onnc-dev-normal --build-arg MODE=normal -f docker/Dockerfile .
 docker build -t onnc/onnc-dev-debug --build-arg MODE=dbg -f docker/Dockerfile .
+
+docker build -t onnc/onnc-community -f docker/Dockerfile.community .

@@ -1,0 +1,5 @@
+FROM onnc/onnc-dev-normal
+
+COPY --chown=onnc:onnc \
+  --from=onnc-benchmarking-models \
+  /models /models

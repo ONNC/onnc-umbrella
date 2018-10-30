@@ -47,10 +47,12 @@ echo "== Tag images for release =="
 docker tag onnc/onnc-dev-external-prebuilt "onnc/onnc-dev-external-prebuilt:$TAG"
 docker tag onnc/onnc-dev-normal "onnc/onnc-normal:$TAG"
 docker tag onnc/onnc-dev-debug "onnc/onnc-debug:$TAG"
+docker tag onnc/onnc-community "onnc/onnc-community:$TAG"
 
 if [ -n "$PUSH" ]; then
   echo "== Tag images for release =="
   docker push "onnc/onnc-dev-external-prebuilt:$TAG"
   docker push "onnc/onnc-normal:$TAG"
   docker push "onnc/onnc-debug:$TAG"
+  docker push "onnc/onnc-community:$TAG"
 fi
