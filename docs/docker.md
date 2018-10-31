@@ -114,11 +114,8 @@ Higher level will also contain informations of all lower levels.
 
 You may modify onnc sources and need to build your onnc images. These are steps to rebuild them.
 
-### Step 1: Get onnc-umbrella from GitHub
+### Step 1: Modify source code in `src` directory
 
-```shell
-$ git clone --recursive https://github.com/ONNC/onnc-umbrella.git
-```
 
 ### Step 2: Run build script for docker
 
