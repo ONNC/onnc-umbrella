@@ -8,11 +8,12 @@ args=()
 
 function help_info() {
   echo "Usage: run-benchmark.sh [options]... MODEL [ARGUMENTS...]"
-  echo "    --rebuild           Rebuild before run. (Put the source to /${HOME}/onnc)"
-  echo "    MODEL               Run model MODEL."
-  echo "    ARGUMENTS           Arguments be passed to target."
+  echo "    --rebuild           Rebuild the source code"
+  echo "                        (Will build the source in the /${HOME}/onnc directory)"
+  echo "    MODEL               Any model from the ONNX model zoo"
+  echo "    ARGUMENTS           Arguments be passed to target"
   echo "========================================"
-  echo "ONNX model list (from ONNX model zoo):"
+  echo "ONNX model list (from the ONNX model zoo):"
   echo "${ONNX_MODEL_LIST}"
 }
 
