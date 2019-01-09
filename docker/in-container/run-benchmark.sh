@@ -53,6 +53,10 @@ done
 if [ -n "$REBUILD" ]; then
   cd "$HOME/onnc-umbrella/build-normal"
   smake install -j4
+  if [ $? -ne 0 ]; then
+    echo "Rebuild fail"
+    exit 1
+  fi
   cd -
 fi
 
