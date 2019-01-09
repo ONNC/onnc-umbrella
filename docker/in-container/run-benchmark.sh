@@ -50,6 +50,11 @@ do
   esac
 done
 
+if [ -z "$RUN_MODEL" ]; then
+  help_info
+  exit 1
+fi
+
 if [ -n "$REBUILD" ]; then
   cd "$HOME/onnc-umbrella/build-normal"
   smake install -j4
