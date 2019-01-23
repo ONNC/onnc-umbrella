@@ -18,10 +18,10 @@ RUN sed -i 's/archive.ubuntu.com/debian.linux.org.tw/' /etc/apt/sources.list \
 
 USER onnc
 
-RUN pip install setuptools
+RUN sudo pip -H install setuptools
 
 COPY --chown=onnc:onnc ./external/onnx /onnc/onnx
-RUN pip install /onnc/onnx
+RUN sudo pip -H install /onnc/onnx
 
 WORKDIR /onnc/onnc-umbrella
 RUN sudo chown onnc:onnc /onnc/onnc-umbrella
