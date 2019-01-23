@@ -1,10 +1,10 @@
-build
-build-*
-install-*
-onncroot
+/build
+/build-*
+/install-*
+/onncroot
 GPATH
 GRTAGS
 GTAGS
 __pycache__
-external/llvm
-src
+/external/llvm
+/src
