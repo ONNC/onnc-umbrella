@@ -1,0 +1,48 @@
+FROM onnc/onnc-community
+
+# copy nvdla image directory
+COPY --chown=onnc:onnc --from=nvdla/vp \
+  /usr/local/nvdla /usr/local/nvdla
+
+# copy dependent shared libraries
+COPY --from=nvdla/vp \
+  /usr/local/systemc-2.3.0 /usr/local/systemc-2.3.0
+
+COPY --from=nvdla/vp \
+  /usr/bin/aarch64_toplevel /usr/bin
+
+COPY --from=nvdla/vp \
+  /usr/lib/libsimplecpu.so /usr/lib
+
+COPY --from=nvdla/vp \
+  /usr/lib/liblog.so /usr/lib
+
+COPY --from=nvdla/vp \
+  /usr/lib/libnvdla.so /usr/lib
+
+COPY --from=nvdla/vp \
+  /usr/lib/libcosim_sc_wrapper.so /usr/lib
+
+COPY --from=nvdla/vp \
+  /usr/lib/libnvdla_cmod.so /usr/lib
+
+COPY --from=nvdla/vp \
+  /usr/lib/libqbox-nvdla.so /usr/lib
+
+USER root
+
+# install packges
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y libpixman-1-0 libglib2.0 liblua5.2-0
+
+WORKDIR /usr/local/nvdla
+ENV SC_SIGNAL_WRITE_CHECK=DISABLE
+# Start using virtual platform (under /usr/local/nvdla)
+#
+#   $ aarch64_toplevel -c aarch64_nvdla.lua
+#
+#   (log in kernel with username='root', password='nvdla')
+#
+#   $ mount -t 9p -o trans=virtio r /mnt && cd /mnt
+#   $ insmod drm.ko && insmod opendla.ko
+
+USER onnc
