@@ -9,3 +9,5 @@ docker build -t onnc/onnc-dev-normal --build-arg MODE=normal -f docker/Dockerfil
 docker build -t onnc/onnc-dev-debug --build-arg MODE=dbg -f docker/Dockerfile .
 
 docker build -t onnc/onnc-community -f docker/Dockerfile.community .
+
+docker build -t onnc/onnc-community-vp -f docker/Dockerfile.community-vp .
