@@ -15,7 +15,6 @@ fi
 
 onnc_home=/onnc/onnc
 onnc_scripts=$onnc_home/scripts
-umbrella_scripts=/onnc/onnc-umbrella/scripts
 
 model="$1"
 input="$2"
@@ -29,8 +28,8 @@ mv out.nvdla $work_dir/model.nvdla
 
 # prepare nvdla input image
 $onnc_scripts/convert-tensor-to-jpeg.py $input -o $work_dir/input.jpg
-$umbrella_scripts/nvdla-runtime.expect root nvdla /mnt/model.nvdla /mnt/input.jpg
+nvdla-runtime.expect root nvdla /mnt/model.nvdla /mnt/input.jpg
 
 # check nvdla output
-diff <($umbrella_scripts/dump-predict-ranks.py /usr/local/nvdla/output.dimg) <($umbrella_scripts/dump-predict-ranks.py $output)
+diff <(dump-predict-ranks.py $work_dir/output.dimg) <(dump-predict-ranks.py $output)
 exit $?
