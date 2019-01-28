@@ -1,0 +1,27 @@
+#!/usr/bin/expect
+set timeout -1
+set username [lindex $argv 0]
+set password [lindex $argv 1]
+set loadable [lindex $argv 2]
+set image [lindex $argv 3]
+set prompt "# "
+spawn ssh -p 6667 $username@localhost
+expect {
+ "(yes/no)?" {
+  send "yes\n"
+  expect "*assword:" { send "$password\n"}
+ }
+ "*assword:" {
+  send "$password\n"
+ }
+}
+expect "$prompt" {
+ send "cd /mnt\n"
+}
+expect "$prompt" {
+ send "/mnt/nvdla_runtime --loadable $loadable --image $image --rawdump\n"
+}
+expect "$prompt" {
+ send "logout\n"
+}
+expect eof
