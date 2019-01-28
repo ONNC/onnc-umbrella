@@ -2,9 +2,11 @@ FROM onnc/onnc-dev-external-prebuilt
 
 RUN sudo apt-get update \
     && sudo apt-get install -y --no-install-recommends \
-        less \
-        vim \
         bash-completion \
+        expect \
+        less \
+        ssh \
+        vim \
     && sudo rm -rf /var/lib/apt/lists/*
 
 COPY --chown=onnc:onnc \
