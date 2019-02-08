@@ -1,5 +1,13 @@
 FROM onnc/onnc-community
 
+# install packges
+RUN sudo apt-get update \
+    && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        libpixman-1-0 \
+        libglib2.0 \
+        liblua5.2-0 \
+    && sudo rm -rf /var/lib/apt/lists/*
+
 # copy nvdla image directory
 COPY --chown=onnc:onnc --from=nvdla/vp \
   /usr/local/nvdla /usr/local/nvdla
@@ -12,27 +20,13 @@ COPY --from=nvdla/vp \
   /usr/bin/aarch64_toplevel /usr/bin
 
 COPY --from=nvdla/vp \
-  /usr/lib/libsimplecpu.so /usr/lib
-
-COPY --from=nvdla/vp \
-  /usr/lib/liblog.so /usr/lib
-
-COPY --from=nvdla/vp \
-  /usr/lib/libnvdla.so /usr/lib
-
-COPY --from=nvdla/vp \
-  /usr/lib/libcosim_sc_wrapper.so /usr/lib
-
-COPY --from=nvdla/vp \
-  /usr/lib/libnvdla_cmod.so /usr/lib
-
-COPY --from=nvdla/vp \
-  /usr/lib/libqbox-nvdla.so /usr/lib
-
-USER root
-
-# install packges
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y libpixman-1-0 libglib2.0 liblua5.2-0
+  /usr/lib/libsimplecpu.so \
+  /usr/lib/liblog.so \
+  /usr/lib/libnvdla.so \
+  /usr/lib/libcosim_sc_wrapper.so \
+  /usr/lib/libnvdla_cmod.so \
+  /usr/lib/libqbox-nvdla.so \
+  /usr/lib/
 
 WORKDIR /usr/local/nvdla
 ENV SC_SIGNAL_WRITE_CHECK=DISABLE
@@ -44,5 +38,3 @@ ENV SC_SIGNAL_WRITE_CHECK=DISABLE
 #
 #   $ mount -t 9p -o trans=virtio r /mnt && cd /mnt
 #   $ insmod drm.ko && insmod opendla.ko
-
-USER onnc
