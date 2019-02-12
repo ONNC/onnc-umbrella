@@ -6,7 +6,7 @@ RUN groupadd --gid 1000 onnc \
     && echo 'onnc ALL=(ALL:ALL) NOPASSWD:ALL' >> /etc/sudoers.d/onnc \
     && chmod 440 /etc/sudoers.d/onnc
 
-RUN sed -i 's/archive.ubuntu.com/debian.linux.org.tw/' /etc/apt/sources.list \
+RUN sed -i 's/archive.ubuntu.com/ftp.ubuntu-tw.net/' /etc/apt/sources.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
