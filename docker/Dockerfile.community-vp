@@ -3,10 +3,14 @@ FROM onnc/onnc-community
 # install packges
 RUN sudo apt-get update \
     && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        expect \
         libpixman-1-0 \
         libglib2.0 \
         liblua5.2-0 \
+        ssh \
     && sudo rm -rf /var/lib/apt/lists/*
+
+RUN sudo -H pip install Pillow
 
 # copy nvdla image directory
 COPY --chown=onnc:onnc --from=nvdla/vp \
@@ -17,7 +21,7 @@ COPY --from=nvdla/vp \
   /usr/local/systemc-2.3.0 /usr/local/systemc-2.3.0
 
 COPY --from=nvdla/vp \
-  /usr/bin/aarch64_toplevel /usr/bin
+  /usr/bin/aarch64_toplevel /usr/bin/
 
 COPY --from=nvdla/vp \
   /usr/lib/libsimplecpu.so \
@@ -29,6 +33,7 @@ COPY --from=nvdla/vp \
   /usr/lib/
 
 WORKDIR /usr/local/nvdla
+
 ENV SC_SIGNAL_WRITE_CHECK=DISABLE
 # Start using virtual platform (under /usr/local/nvdla)
 #
