@@ -1,27 +1,11 @@
-include(check)
+file(GLOB regression_tests RELATIVE ${CMAKE_CURRENT_LIST_DIR}/regression regression/*)
 
-set(ONNC_TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-set(ONNC_TOOL_BIN_DIR "${CMAKE_CURRENT_BINARY_DIR}/../tools")
-string(REPLACE ";" " " ONNC_TARGETS_BUILT "${ONNC_TARGETS_TO_BUILD}")
-
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/lit.site.cfg.in
-    ${CMAKE_CURRENT_BINARY_DIR}/lit.site.cfg)
-
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/onnc-lit.py.in
-    ${CMAKE_CURRENT_BINARY_DIR}/onnc-lit.py)
-
-set(LLVM_LIT_ARGS "-sv" CACHE STRING "Default options for lit")
-
-set(check-dep
-    onnx-as
-    onnx-dis)
-
-if (TARGET_TG)
-    set(check-dep ${check-dep} onnx2tg)
-endif()
-
-add_lit_testsuites(LLVM ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS ${check-dep})
-add_custom_target(check DEPENDS check-onnc)
+foreach(regression_test IN LISTS regression_tests)
+    add_test(
+        NAME ${regression_test}
+        COMMAND bash "${CMAKE_CURRENT_LIST_DIR}/regression/${regression_test}/main.sh"
+    )
+    set_tests_properties(${regression_test} PROPERTIES
+        ENVIRONMENT "PATH=$ENV{PATH}:${ONNC_UMBRELLA_ROOT}/install-${build_mode_for_command}${CMAKE_INSTALL_PREFIX}/bin"
+    )
+endforeach(regression_test)
