@@ -32,14 +32,10 @@ COPY --from=nvdla/vp \
   /usr/lib/libqbox-nvdla.so \
   /usr/lib/
 
-WORKDIR /usr/local/nvdla
+RUN mkdir -p /onnc/loadables
 
-ENV SC_SIGNAL_WRITE_CHECK=DISABLE
-# Start using virtual platform (under /usr/local/nvdla)
-#
-#   $ aarch64_toplevel -c aarch64_nvdla.lua
-#
-#   (log in kernel with username='root', password='nvdla')
-#
-#   $ mount -t 9p -o trans=virtio r /mnt && cd /mnt
-#   $ insmod drm.ko && insmod opendla.ko
+WORKDIR /onnc/onnc-umbrella
+
+COPY --chown=onnc:onnc docker/loadables /onnc/loadables
+
+WORKDIR /onnc/onnc-umbrella/build-normal

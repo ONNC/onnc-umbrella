@@ -4,3 +4,6 @@
 [submodule "external/onnx"]
 	path = external/onnx
 	url = https://github.com/onnx/onnx.git
+[submodule "src"]
+	path = src
+	url = ../onnc.git
