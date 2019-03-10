@@ -8,3 +8,4 @@ GTAGS
 __pycache__
 /external/llvm
 /docker/loadables
+.DS_Store

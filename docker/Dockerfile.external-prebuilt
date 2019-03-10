@@ -32,7 +32,7 @@ COPY --chown=onnc:onnc ./build.* ./
 
 RUN mkdir -p ./src
 
-ARG THREAD=8
+ARG THREAD=4
 
 RUN MAX_MAKE_JOBS=${THREAD} \
     EXTERNAL_ONLY=true \
