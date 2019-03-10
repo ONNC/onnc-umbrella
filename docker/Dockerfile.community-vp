@@ -31,11 +31,3 @@ COPY --from=nvdla/vp \
   /usr/lib/libnvdla_cmod.so \
   /usr/lib/libqbox-nvdla.so \
   /usr/lib/
-
-RUN mkdir -p /onnc/loadables
-
-WORKDIR /onnc/onnc-umbrella
-
-COPY --chown=onnc:onnc docker/loadables /onnc/loadables
-
-WORKDIR /onnc/onnc-umbrella/build-normal
