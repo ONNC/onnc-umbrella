@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-ONNC_REVISION=5264da95e1678d2c8427cfe86140f487566795cc
+ONNC_REVISION=1.0.0
 
 ONNX_MODELS=(
   bvlc_alexnet
@@ -15,10 +15,9 @@ ONNX_MODELS=(
 DOCKER_DIR=`pwd`/docker
 
 cd /tmp
-if [ ! -d /tmp/onnc ]; then
-  git clone --recurse-submodules git@git.skymizer.com:onnc/onnc.git
-fi
-cd onnc && git clean -fxd && git checkout $ONNC_REVISION
+rm -rf onnc
+git clone --recurse-submodules https://github.com/ONNC/onnc.git
+cd onnc && git checkout $ONNC_REVISION
 
 mkdir -p $DOCKER_DIR/loadables
 
