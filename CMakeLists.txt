@@ -4,7 +4,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(ONNC_UMBRELLA_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
 # Set build type
-set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type [Release(default)/Debug/Regression]")
+set(CMAKE_BUILD_TYPE "normal")
+#set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type [Release(default)/Debug/Regression]")
+Message("build type is ${CMAKE_BUILD_TYPE}")
  # for build.cmake.sh
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     option(ENABLE_UNITTEST "enable unittest" ON)
@@ -19,11 +21,18 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 # Build
 # TODO: Integrate src CMake later
+#add_subdirectory(src)
 
 add_custom_target(onnc ALL
     COMMAND MAX_MAKE_JOBS=$ENV{MAX_MAKE_JOBS} ./build.cmake.sh ${build_mode_for_command} ${CMAKE_INSTALL_PREFIX}
     WORKING_DIRECTORY ${ONNC_UMBRELLA_ROOT}
 )
+
+# create folder for each model
+execute_process(
+	COMMAND sh make_models_test.sh 
+	WORKING_DIRECTORY ${ONNC_UMBRELLA_ROOT}
+	)
 
 # Test
 add_subdirectory(test)

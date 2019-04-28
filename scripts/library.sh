@@ -159,6 +159,7 @@ function build_autotools_project
 
 function build_cmake_project
 {
+  set -x
   local SRCDIR=$1
   local NAME=$(basename "${SRCDIR}")
   local BUILDDIR=$(getabs "build-${NAME}")
@@ -183,6 +184,7 @@ function build_cmake_project
 
   show "finishing ..."
   popd > /dev/null
+  set +x
 }
 
 function build_handcraft_project
