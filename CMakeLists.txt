@@ -30,7 +30,7 @@ add_custom_target(onnc ALL
 
 # create folder for each model
 execute_process(
-	COMMAND sh make_models_test.sh 
+	COMMAND sh make_models_test.sh ${PROJECT_BINARY_DIR}
 	WORKING_DIRECTORY ${ONNC_UMBRELLA_ROOT}
 	)
 
