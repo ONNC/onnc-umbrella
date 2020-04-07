@@ -4,6 +4,7 @@
 #
 MAKE=${MAKE:-make}
 NINJA=${NINJA:-ninja}
+CMAKE=${CMAKE:-cmake}
 
 ##===----------------------------------------------------------------------===##
 # Helper functions
@@ -161,27 +162,14 @@ function build_cmake_project
 {
   local SRCDIR=$1
   local NAME=$(basename "${SRCDIR}")
-  local BUILDDIR=$(getabs "build-${NAME}")
-  local INSTALLDIR=$2
-
-  shift; shift
-
-  show "building ${NAME} ..."
-
-  if [ ! -d "${BUILDDIR}" ]; then
-    show "create build directory at '${BUILDDIR}'"
-    mkdir -p "${BUILDDIR}"
-  fi
-
+  local BUILDDIR=$2
+  local INSTALLDIR=$3
+  local THREAD_NUM=$4
+  shift; shift; shift; shift
   pushd "${BUILDDIR}" > /dev/null
-  show "creating makefiles ..."
-  fail_panic "Cmake project - ${NAME} failed." cmake -DCMAKE_INSTALL_PREFIX="${INSTALLDIR}" "${SRCDIR}" "$@"
-
-  local PARALLEL_BUILD_FLAG=${MAX_MAKE_JOBS:+"-j${MAX_MAKE_JOBS}"}
-  show "making ... #jobs=${MAX_MAKE_JOBS}"
-  fail_panic "Make cmake project - ${NAME} failed." ${MAKE} ${PARALLEL_BUILD_FLAG} all install
-
-  show "finishing ..."
+  fail_panic "Cmake project - ${NAME} failed." ${CMAKE} "$@" "${SRCDIR}"
+  #fail_panic "Cmake project - ${NAME} failed." ${CMAKE} -DCMAKE_INSTALL_PREFIX="${INSTALLDIR}" "$@" "${SRCDIR}"
+  fail_panic "Make cmake project - ${NAME} failed." ${MAKE} -j${THREAD_NUM} all install
   popd > /dev/null
 }
 
@@ -214,6 +202,26 @@ function build_handcraft_project
 ##===----------------------------------------------------------------------===##
 # Build functions
 ##===----------------------------------------------------------------------===##
+function build_mkldnn
+{
+  local SRCDIR=$1
+  local NAME=$(basename "${SRCDIR}")
+  local BUILDDIR=$(getabs "build-${NAME}")
+  local INSTALLDIR=$2
+
+  if [ ! -d "${BUILDDIR}" ]; then
+    show "create build directory at '${BUILDDIR}'"
+    mkdir -p "${BUILDDIR}"
+  fi
+
+  show "Build MKLDNN ..."
+  build_cmake_project ${SRCDIR} ${BUILDDIR} ${INSTALLDIR} 3 \
+    "-DCMAKE_BUILD_TYPE=Release"
+  sudo ldconfig
+  show "Done"
+}
+
+
 function build_skypat
 {
   build_autotools_project "$1" "$2"
@@ -419,10 +427,10 @@ function build_external
   show "building external libraries..."
 
   fail_panic "directory not found: ${ONNC_EXTSRCDIR}" test -d "${ONNC_EXTSRCDIR}"
-
   build_skypat  "${ONNC_EXTSRCDIR}/SkyPat"   "${ONNC_EXTDIR}"
   build_llvm    "${ONNC_EXTSRCDIR}/llvm"     "${ONNC_EXTDIR}"
   build_onnx    "${ONNC_EXTSRCDIR}/onnx"     "${ONNC_EXTDIR}" "${ONNC_ONNX_NAMESPACE}"
+  build_mkldnn  "${ONNC_EXTSRCDIR}/mkldnn"   "${ONNC_EXTDIR}"
 }
 
 ##===----------------------------------------------------------------------===##
