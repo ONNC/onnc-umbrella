@@ -10,3 +10,6 @@
 [submodule "external/NVDLA"]
 	path = external/NVDLA
 	url = https://github.com/nvdla/sw.git
+[submodule "external/mkldnn"]
+	path = external/mkldnn
+	url = https://github.com/oneapi-src/oneDNN.git
