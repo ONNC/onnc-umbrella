@@ -169,7 +169,7 @@ function build_cmake_project
   pushd "${BUILDDIR}" > /dev/null
   fail_panic "Cmake project - ${NAME} failed." ${CMAKE} "$@" "${SRCDIR}"
   #fail_panic "Cmake project - ${NAME} failed." ${CMAKE} -DCMAKE_INSTALL_PREFIX="${INSTALLDIR}" "$@" "${SRCDIR}"
-  fail_panic "Make cmake project - ${NAME} failed." ${MAKE} -j${THREAD_NUM} all install
+  fail_panic "Make cmake project - ${NAME} failed." ${MAKE} -j${THREAD_NUM} all
   popd > /dev/null
 }
 
@@ -217,6 +217,11 @@ function build_mkldnn
   show "Build MKLDNN ..."
   build_cmake_project ${SRCDIR} ${BUILDDIR} ${INSTALLDIR} 3 \
     "-DCMAKE_BUILD_TYPE=Release"
+
+  pushd "${BUILDDIR}" > /dev/null
+  sudo ${MAKE} install
+  popd > /dev/null
+
   sudo ldconfig
   show "Done"
 }
