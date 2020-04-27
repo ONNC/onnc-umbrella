@@ -216,8 +216,7 @@ function build_mkldnn
 
   show "Build MKLDNN ..."
   build_cmake_project ${SRCDIR} ${BUILDDIR} ${INSTALLDIR} 3 \
-    "-DCMAKE_BUILD_TYPE=Release" \
-    "-DDNNL_LIBRARY_TYPE=STATIC"
+    "-DCMAKE_BUILD_TYPE=Release"
 
   pushd "${BUILDDIR}" > /dev/null
   sudo ${MAKE} install
