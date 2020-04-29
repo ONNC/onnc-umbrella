@@ -25,6 +25,8 @@ function build_onnc
                           -DONNX_ROOT="${ONNC_EXTDIR}" \
                           -DONNX_NAMESPACE=${ONNC_ONNX_NAMESPACE} \
                           -DSKYPAT_ROOT="${ONNC_EXTDIR}" \
+                          -DUSE_MKLDNN=ON \
+                          -DMKLDNN_ROOT="${ONNC_EXTDIR}" \
                           ${ONNC_SRCDIR}
       ;;
     dbg)
@@ -34,6 +36,8 @@ function build_onnc
                           -DONNX_ROOT="${ONNC_EXTDIR}" \
                           -DONNX_NAMESPACE=${ONNC_ONNX_NAMESPACE} \
                           -DSKYPAT_ROOT="${ONNC_EXTDIR}" \
+                          -DUSE_MKLDNN=ON \
+                          -DMKLDNN_ROOT="${ONNC_EXTDIR}" \
                           ${ONNC_SRCDIR}
       ;;
     rgn)
@@ -43,6 +47,8 @@ function build_onnc
                           -DONNX_ROOT="${ONNC_EXTDIR}" \
                           -DONNX_NAMESPACE=${ONNC_ONNX_NAMESPACE} \
                           -DSKYPAT_ROOT="${ONNC_EXTDIR}" \
+                          -DUSE_MKLDNN=ON \
+                          -DMKLDNN_ROOT="${ONNC_EXTDIR}" \
                           ${ONNC_SRCDIR}
       ;;
     opt)
@@ -52,6 +58,8 @@ function build_onnc
                           -DONNX_ROOT="${ONNC_EXTDIR}" \
                           -DONNX_NAMESPACE=${ONNC_ONNX_NAMESPACE} \
                           -DSKYPAT_ROOT="${ONNC_EXTDIR}" \
+                          -DUSE_MKLDNN=ON \
+                          -DMKLDNN_ROOT="${ONNC_EXTDIR}" \
                           ${ONNC_SRCDIR}
       ;;
     *)
