@@ -317,6 +317,29 @@ function build_onnx
   popd > /dev/null
 }
 
+function build_systemc
+{
+  local SRCDIR=$1
+  local NAME=$(basename "${SRCDIR}")
+  local BUILDDIR=$(getabs "build-${NAME}")
+  local INSTALLDIR=$2
+
+  if [ ! -d "${BUILDDIR}" ]; then
+    show "create build directory at '${BUILDDIR}'"
+    mkdir -p "${BUILDDIR}"
+  fi
+
+  show "Build SystemC ..."
+  build_cmake_project ${SRCDIR} ${BUILDDIR} ${INSTALLDIR} 3 \
+    "-DCMAKE_BUILD_TYPE=Release"
+
+  pushd "${BUILDDIR}" > /dev/null
+  ${MAKE} install
+  popd > /dev/null
+
+  show "Done"
+}
+
 ##===----------------------------------------------------------------------===##
 # Print usage
 ##===----------------------------------------------------------------------===##
@@ -436,6 +459,7 @@ function build_external
   build_llvm    "${ONNC_EXTSRCDIR}/llvm"     "${ONNC_EXTDIR}"
   build_onnx    "${ONNC_EXTSRCDIR}/onnx"     "${ONNC_EXTDIR}" "${ONNC_ONNX_NAMESPACE}"
   build_mkldnn  "${ONNC_EXTSRCDIR}/mkldnn"   "${ONNC_EXTDIR}"
+  build_systemc "${ONNC_EXTSRCDIR}/systemc"  "${ONNC_EXTDIR}"
 }
 
 ##===----------------------------------------------------------------------===##
