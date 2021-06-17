@@ -17,3 +17,6 @@
 	path = external/systemc
 	url = https://github.com/accellera-official/systemc.git
   branch = release
+[submodule "external/onnx_models"]
+	path = external/onnx_models
+	url = https://github.com/onnx/models.git
