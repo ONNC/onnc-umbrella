@@ -13,3 +13,7 @@
 [submodule "external/mkldnn"]
 	path = external/mkldnn
 	url = https://github.com/oneapi-src/oneDNN.git
+[submodule "external/systemc"]
+	path = external/systemc
+	url = https://github.com/accellera-official/systemc.git
+  branch = release
