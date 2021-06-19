@@ -18,12 +18,12 @@ function build_onnc
   pushd "${ONNC_BUILDDIR}" > /dev/null
 
   local CMAKE_ARGUMENTS="-DUSE_MKLDNN=ON \
-                         -DMKLDNN_ROOT=\"${ONNC_EXTDIR}\" \
-                         -DCMAKE_INSTALL_PREFIX=\"${ONNC_PREFIX}\" \
-                         -DLLVM_ROOT_DIR=\"${ONNC_EXTDIR}\" \
-                         -DONNX_ROOT=\"${ONNC_EXTDIR}\" \
+                         -DMKLDNN_ROOT=${ONNC_EXTDIR} \
+                         -DCMAKE_INSTALL_PREFIX=${ONNC_PREFIX} \
+                         -DLLVM_ROOT_DIR=${ONNC_EXTDIR} \
+                         -DONNX_ROOT=${ONNC_EXTDIR} \
                          -DONNX_NAMESPACE=${ONNC_ONNX_NAMESPACE} \
-                         -DSKYPAT_ROOT=\"${ONNC_EXTDIR}\""
+                         -DSKYPAT_ROOT=${ONNC_EXTDIR}"
   case "$(platform)" in
     macosx)
       # SystemC needs gcc 8 to link with.
