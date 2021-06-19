@@ -141,11 +141,13 @@ function build_autotools_project
 
   pushd "${SRCDIR}" > /dev/null
   show "configuring ..."
-  AUTOGEN=./autogen.sh
-  if [ ! -x "${AUTOGEN}" ]; then
-    AUTOGEN=autoreconf
+  if [ ! -x "./configure" ]; then
+    AUTOGEN=./autogen.sh
+    if [ ! -x "${AUTOGEN}" ]; then
+      AUTOGEN=autoreconf
+    fi
+    fail_panic "Autogen autotools project - ${NAME} failed." ${AUTOGEN}
   fi
-  fail_panic "Autogen autotools project - ${NAME} failed." ${AUTOGEN}
   popd > /dev/null
 
   pushd "${BUILDDIR}" > /dev/null
@@ -222,7 +224,13 @@ function build_mkldnn
   sudo ${MAKE} install
   popd > /dev/null
 
-  sudo ldconfig
+  case "$(platform)" in
+    linux)
+      sudo ldconfig
+    ;;
+    *)
+    ;;
+  esac
   show "Done"
 }
 
@@ -319,25 +327,7 @@ function build_onnx
 
 function build_systemc
 {
-  local SRCDIR=$1
-  local NAME=$(basename "${SRCDIR}")
-  local BUILDDIR=$(getabs "build-${NAME}")
-  local INSTALLDIR=$2
-
-  if [ ! -d "${BUILDDIR}" ]; then
-    show "create build directory at '${BUILDDIR}'"
-    mkdir -p "${BUILDDIR}"
-  fi
-
-  show "Build SystemC ..."
-  build_cmake_project ${SRCDIR} ${BUILDDIR} ${INSTALLDIR} 3 \
-    "-DCMAKE_BUILD_TYPE=Release"
-
-  pushd "${BUILDDIR}" > /dev/null
-  ${MAKE} install
-  popd > /dev/null
-
-  show "Done"
+  build_autotools_project $1 $2
 }
 
 ##===----------------------------------------------------------------------===##
