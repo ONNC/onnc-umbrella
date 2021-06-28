@@ -17,47 +17,41 @@ function build_onnc
   mkdir -p "${ONNC_BUILDDIR}"
   pushd "${ONNC_BUILDDIR}" > /dev/null
 
-  show "configuring ..."
-  fail_panic "Autogen onnc failed." ${ONNC_SRCDIR}/autogen.sh
+  local CMAKE_ARGUMENTS="-DUSE_MKLDNN=ON \
+                         -DMKLDNN_ROOT=${ONNC_EXTDIR} \
+                         -DCMAKE_INSTALL_PREFIX=${ONNC_PREFIX} \
+                         -DLLVM_ROOT_DIR=${ONNC_EXTDIR} \
+                         -DONNX_ROOT=${ONNC_EXTDIR} \
+                         -DONNX_NAMESPACE=${ONNC_ONNX_NAMESPACE} \
+                         -DSKYPAT_ROOT=${ONNC_EXTDIR}"
+  case "$(platform)" in
+    macosx)
+      # SystemC needs gcc 8 to link with.
+      CMAKE_ARGUMENTS+=" -DCMAKE_C_COMPILER=gcc-8 -DCMAKE_CXX_COMPILER=g++-8"
+    ;;
+    *)
+    ;;
+  esac
 
   case "${ONNC_MODE}" in
     normal)
-      fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
-                          --with-onnx="${ONNC_EXTDIR}" \
-                          --with-llvm="${ONNC_EXTDIR}" \
-                          --with-skypat="${ONNC_EXTDIR}" \
-                          --with-onnx-namespace="${ONNC_ONNX_NAMESPACE}"
+      CMAKE_ARGUMENTS+=" -DCMAKE_BUILD_TYPE=Release"
       ;;
     dbg)
-      fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
-                          --with-skypat="${ONNC_EXTDIR}" \
-                          --with-onnx="${ONNC_EXTDIR}" \
-                          --with-llvm="${ONNC_EXTDIR}" \
-                          --with-onnx-namespace="${ONNC_ONNX_NAMESPACE}" \
-                          --enable-unittest
+      CMAKE_ARGUMENTS+=" -DCMAKE_BUILD_TYPE=Debug"
       ;;
     rgn)
-      fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
-                          --with-onnx="${ONNC_EXTDIR}" \
-                          --with-skypat="${ONNC_EXTDIR}" \
-                          --with-llvm="${ONNC_EXTDIR}" \
-                          --with-onnx-namespace="${ONNC_ONNX_NAMESPACE}" \
-                          --enable-debug \
-                          --enable-unittest \
-                          --enable-regression
+      CMAKE_ARGUMENTS+=" -DCMAKE_BUILD_TYPE=Regression"
       ;;
     opt)
-      fail_panic "Configure onnc failed." ${ONNC_SRCDIR}/configure --prefix="${ONNC_PREFIX}" \
-                          --with-onnx="${ONNC_EXTDIR}/../external/install" \
-                          --with-skypat="${ONNC_EXTDIR}" \
-                          --with-llvm="${ONNC_EXTDIR}" \
-                          --with-onnx-namespace="${ONNC_ONNX_NAMESPACE}" \
-                          --enable-optimize
+      CMAKE_ARGUMENTS+=" -DCMAKE_BUILD_TYPE=Optimized"
       ;;
     *)
       fatal "unexpected error: unknown mode '${ONNC_MODE}'"
       ;;
   esac
+
+  fail_panic "CMake onnc failed." cmake ${CMAKE_ARGUMENTS} ${ONNC_SRCDIR}
 
   local PARALLEL_BUILD_FLAG=${MAX_MAKE_JOBS:+"-j${MAX_MAKE_JOBS}"}
   show "making ... #jobs=${MAX_MAKE_JOBS}"
@@ -112,7 +106,7 @@ fi
 # Parse arguments and setup environment
 setup_environment "$@"
 
-# Build external libraries and libonnc
+# Build external libraries, libonnc and tools
 if [ "${BUILD_EXTERNAL}" != "false" ]; then
   build_external
   if [ "${EXTERNAL_ONLY}" = "true" ]; then
