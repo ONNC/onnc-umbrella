@@ -162,6 +162,7 @@ function build_autotools_project
 
 function build_cmake_project
 {
+  set -x
   local SRCDIR=$1
   local NAME=$(basename "${SRCDIR}")
   local BUILDDIR=$2
@@ -173,6 +174,7 @@ function build_cmake_project
   #fail_panic "Cmake project - ${NAME} failed." ${CMAKE} -DCMAKE_INSTALL_PREFIX="${INSTALLDIR}" "$@" "${SRCDIR}"
   fail_panic "Make cmake project - ${NAME} failed." ${MAKE} -j${THREAD_NUM} all
   popd > /dev/null
+  set +x
 }
 
 function build_handcraft_project

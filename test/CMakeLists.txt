@@ -1,6 +1,7 @@
 file(GLOB regression_tests RELATIVE ${CMAKE_CURRENT_LIST_DIR}/regression regression/*)
 
 foreach(regression_test IN LISTS regression_tests)
+	message("adding test ${regression_test}")
     add_test(
         NAME ${regression_test}
         COMMAND bash "${CMAKE_CURRENT_LIST_DIR}/regression/${regression_test}/main.sh"
