@@ -23,7 +23,8 @@ function build_onnc
                          -DLLVM_ROOT_DIR=${ONNC_EXTDIR} \
                          -DONNX_ROOT=${ONNC_EXTDIR} \
                          -DONNX_NAMESPACE=${ONNC_ONNX_NAMESPACE} \
-                         -DSKYPAT_ROOT=${ONNC_EXTDIR}"
+                         -DSKYPAT_ROOT=${ONNC_EXTDIR} \
+                         -DSYSTEMC_ROOT=${ONNC_EXTDIR}"
   case "$(platform)" in
     macosx)
       # SystemC needs gcc 8 to link with.
